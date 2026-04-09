@@ -7,6 +7,7 @@ import java.awt.Insets;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -24,11 +25,10 @@ public class ToolBar {
         toolBar.setOpaque(false);
         toolBar.setAlignmentY(JToolBar.TOP_ALIGNMENT);
         toolBar.setMargin(new Insets(0, 0, 0, 0));
+        toolBar.setAlignmentX(JToolBar.CENTER);
         toolBar.setVisible(true);
 
         // window control buttons and listeners
-
-        
 
         JButton closeButton = new JButton("X");
         closeButton.addActionListener(e -> {
@@ -120,7 +120,13 @@ public class ToolBar {
             }
         });
 
+        JLabel titleLabel = new JLabel("Hayden's Character Generator");
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setHorizontalAlignment(JLabel.LEFT);
+
+        toolBar.add(titleLabel);
         toolBar.add(Box.createHorizontalGlue());
+
         toolBar.add(minimizeButton);
         toolBar.add(maximizeButton);
         toolBar.add(closeButton);

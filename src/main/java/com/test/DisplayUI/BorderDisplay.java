@@ -1,65 +1,38 @@
 package com.test.DisplayUI;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class BorderDisplay extends JPanel implements MouseListener, MouseMotionListener {
+
+    // constants
+
     private static final int TOP_BORDER_HEIGHT = 80;
     private static final int TOP_CORNER_BORDER_WIDTH = 80;
     private static final int TOOLBAR_Y_OFFSET = 5;
     private static final int TOOLBAR_X_OFFSET = 50;
     private static final int TOOLBAR_RIGHT_OVERHANG = 12;
-
     private BufferedImage bt, bb, bl, br, btl, btr, bbl, bbr;
     private static final long serialVersionUID = 1L;     
     private Point start_drag;   
     private Point start_loc;  
     private Rectangle startBounds;
-    private Map<String, BufferedImage> imageCache = new HashMap<>();
-    private int lastCacheWidth = -1;
-    private int lastCacheHeight = -1;
+    private boolean liveResizing = false;
+    private static final int RESIZE_MARGIN = 14;
+    private static final double ASPECT_RATIO = 720.0 / 480.0;
+    private boolean resizing = true;
+    private int resizeDirection = 0; 
 
     public BorderDisplay() {
         addMouseListener(this);
         addMouseMotionListener(this);
         setDoubleBuffered(true);
-    }
-
-    private void clearCacheIfNeeded() {
-        if (getWidth() != lastCacheWidth || getHeight() != lastCacheHeight) {
-            imageCache.clear();
-            lastCacheWidth = getWidth();
-            lastCacheHeight = getHeight();
-        }
-    }
-
-    private BufferedImage getCachedImage(String key, BufferedImage source, int width, int height) {
-        if (!imageCache.containsKey(key)) {
-            imageCache.put(key, scale(source, width, height));
-        }
-        return imageCache.get(key);
     }
 
     public static void main(String[] args) throws IOException {
@@ -106,11 +79,6 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
             public void componentResized(ComponentEvent e) {
                 updateLayout(frame, layered, canvas, toolBarWrapper);
             }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                updateLayout(frame, layered, canvas, toolBarWrapper);
-            }
         });
 
         frame.addWindowStateListener(e -> {
@@ -130,13 +98,19 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        // Use faster interpolation while the user is actively resizing for smoother feedback.
+        Object interpolation = liveResizing
+            ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+            : RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+        Object renderMode = liveResizing
+            ? RenderingHints.VALUE_RENDER_SPEED
+            : RenderingHints.VALUE_RENDER_QUALITY;
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, renderMode);
 
         if (bt != null && btl != null && btr != null && bb != null && bl != null && br != null && bbl != null && bbr != null) {
-            clearCacheIfNeeded();
-
             int leftCornerWidth = TOP_CORNER_BORDER_WIDTH;
             int rightCornerWidth = TOP_CORNER_BORDER_WIDTH;
             int topBottomHeight = TOP_BORDER_HEIGHT;
@@ -146,16 +120,16 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
             int rightCornerX = getWidth() - rightCornerWidth;
             int bottomY = getHeight() - topBottomHeight;
 
-            g2d.drawImage(getCachedImage("btl", btl, leftCornerWidth, topBottomHeight), 0, 0, this);
-            g2d.drawImage(getCachedImage("btr", btr, rightCornerWidth, topBottomHeight), rightCornerX, 0, this);
-            g2d.drawImage(getCachedImage("bbl", bbl, leftCornerWidth, topBottomHeight), 0, bottomY, this);
-            g2d.drawImage(getCachedImage("bbr", bbr, rightCornerWidth, topBottomHeight), rightCornerX, bottomY, this);
+            g2d.drawImage(btl, 0, 0, leftCornerWidth, topBottomHeight, this);
+            g2d.drawImage(btr, rightCornerX, 0, rightCornerWidth, topBottomHeight, this);
+            g2d.drawImage(bbl, 0, bottomY, leftCornerWidth, topBottomHeight, this);
+            g2d.drawImage(bbr, rightCornerX, bottomY, rightCornerWidth, topBottomHeight, this);
 
             int drawX = leftCornerWidth;
-            g2d.drawImage(getCachedImage("bt_edge", bt, availableWidth, topBottomHeight), drawX, 0, this);
-            g2d.drawImage(getCachedImage("bb_edge", bb, availableWidth, topBottomHeight), drawX, bottomY, this);
-            g2d.drawImage(getCachedImage("bl_side", bl, leftCornerWidth, sideHeight), 0, topBottomHeight, this);
-            g2d.drawImage(getCachedImage("br_side", br, rightCornerWidth, sideHeight), getWidth() - rightCornerWidth, topBottomHeight, this);
+            g2d.drawImage(bt, drawX, 0, availableWidth, topBottomHeight, this);
+            g2d.drawImage(bb, drawX, bottomY, availableWidth, topBottomHeight, this);
+            g2d.drawImage(bl, 0, topBottomHeight, leftCornerWidth, sideHeight, this);
+            g2d.drawImage(br, getWidth() - rightCornerWidth, topBottomHeight, rightCornerWidth, sideHeight, this);
             return;
         }
     }
@@ -167,33 +141,20 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         layered.setBounds(0, 0, frameWidth, frameHeight);
         canvas.setBounds(0, 0, frameWidth, frameHeight);
         toolBarWrapper.getToolBar().setBounds(
-            TOP_CORNER_BORDER_WIDTH + TOOLBAR_X_OFFSET,
+            TOP_CORNER_BORDER_WIDTH/2 - 15,
             TOOLBAR_Y_OFFSET,
-            Math.max(1, frameWidth - (TOP_CORNER_BORDER_WIDTH * 2) + TOOLBAR_RIGHT_OVERHANG),
+            Math.max(1, frameWidth - TOP_CORNER_BORDER_WIDTH+40),
             TOP_BORDER_HEIGHT
         );
-
-        canvas.revalidate();
         canvas.repaint();
+        toolBarWrapper.getToolBar().repaint();
     }
 
-
-    private static BufferedImage scale(BufferedImage src, int width, int height) {
-    BufferedImage dst = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-    Graphics2D g2 = dst.createGraphics();
-    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    g2.drawImage(src, 0, 0, width, height, null);
-    g2.dispose();
-
-    return dst;
-    }
 
     public void mousePressed(MouseEvent e) {
         mouseMoved(e);
         start_drag = e.getLocationOnScreen();
+        liveResizing = resizeDirection != 0;
         JFrame frame = (JFrame) this.getTopLevelAncestor();
         if (frame != null) {
             start_loc = frame.getLocation();
@@ -287,11 +248,6 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         }
     }
 
-    private static final int RESIZE_MARGIN = 8;
-    private static final double ASPECT_RATIO = 720.0 / 480.0;
-    private boolean resizing = true;
-    private int resizeDirection = 0; // bitmask: N=1, S=2, W=4, E=8
-
     public void mouseMoved(MouseEvent e) {
         if (!resizing) return;
         int x = e.getX();
@@ -299,10 +255,10 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         int width = getWidth();
         int height = getHeight();
         int direction = 0;
-        if (y < RESIZE_MARGIN) direction |= 1; // N
-        else if (y > height - RESIZE_MARGIN) direction |= 2; // S
-        if (x < RESIZE_MARGIN) direction |= 4; // W
-        else if (x > width - RESIZE_MARGIN) direction |= 8; // E
+        if (y <= RESIZE_MARGIN) direction |= 1; // N
+        else if (y >= height - RESIZE_MARGIN) direction |= 2; // S
+        if (x <= RESIZE_MARGIN) direction |= 4; // W
+        else if (x >= width - RESIZE_MARGIN) direction |= 8; // E
         resizeDirection = direction;
         switch (direction) {
             case 1: setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR)); break;
@@ -323,6 +279,8 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         start_drag = null;
         start_loc = null;
         startBounds = null;
+        liveResizing = false;
+        repaint();
     }
 
     @Override
@@ -336,4 +294,4 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
     @Override
     public void mouseExited(MouseEvent e) {
     }
-}
+} 
