@@ -15,10 +15,12 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
 
     private static final int TOP_BORDER_HEIGHT = 80;
     private static final int TOP_CORNER_BORDER_WIDTH = 80;
-    private static final int TOOLBAR_Y_OFFSET = 5;
-    private static final int TOOLBAR_X_OFFSET = 50;
-    private static final int TOOLBAR_RIGHT_OVERHANG = 12;
-    private BufferedImage bt, bb, bl, br, btl, btr, bbl, bbr;
+    private static final int TOOLBAR_Y_OFFSET = -20;
+    private static final float BACKGROUND_TINT_HUE = Color.RGBtoHSB(233, 0, 0, null)[0];
+    private static final float MIN_TINTABLE_SATURATION = 0.08f;
+    private static final float WHITE_PRESERVE_BRIGHTNESS = 0.92f;
+    private static final float GENERATED_SATURATION_STRENGTH = 0.65f;
+    private BufferedImage bt, bb, bl, br, btl, btr, bbl, bbr, bg;
     private static final long serialVersionUID = 1L;     
     private Point start_drag;   
     private Point start_loc;  
@@ -27,7 +29,7 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
     private static final int RESIZE_MARGIN = 14;
     private static final double ASPECT_RATIO = 720.0 / 480.0;
     private boolean resizing = true;
-    private int resizeDirection = 0; 
+    private int resizeDirection = 0;
 
     public BorderDisplay() {
         addMouseListener(this);
@@ -44,13 +46,14 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         BorderDisplay canvas = new BorderDisplay();
         frame.setSize(720,480);
         frame.setUndecorated(true);
-        frame.setBackground(new Color(0, 0, 0, 0));
+        frame.setBackground(new Color(0, 0, 0,0));
         frame.setLocationRelativeTo(null);
 
         canvas.setBackground(new Color(0, 0, 0, 0));
         canvas.setSize(frame.getSize());
         canvas.setPreferredSize(frame.getSize());
-
+        // background
+        canvas.bg = ImageIO.read(new File("src/main/resources/background base.png"));
         // edges
         canvas.bt = ImageIO.read(new File("src/main/resources/edges/Border CG T.png"));
         canvas.bb = ImageIO.read(new File("src/main/resources/edges/Border CG B.png"));
@@ -109,6 +112,10 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, renderMode);
+
+        if (bg != null) {
+            g2d.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
 
         if (bt != null && btl != null && btr != null && bb != null && bl != null && br != null && bbl != null && bbr != null) {
             int leftCornerWidth = TOP_CORNER_BORDER_WIDTH;

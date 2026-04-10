@@ -1,6 +1,7 @@
 package com.test.DisplayUI;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Insets;
 
@@ -23,7 +24,7 @@ public class ToolBar {
         toolBar.setRollover(false);
         toolBar.setBorderPainted(false);
         toolBar.setOpaque(false);
-        toolBar.setAlignmentY(JToolBar.TOP_ALIGNMENT);
+        toolBar.setAlignmentY(Component.CENTER_ALIGNMENT);
         toolBar.setMargin(new Insets(0, 0, 0, 0));
         toolBar.setAlignmentX(JToolBar.CENTER);
         toolBar.setVisible(true);
@@ -42,7 +43,7 @@ public class ToolBar {
         closeButton.setBorderPainted(false);
         closeButton.setForeground(Color.WHITE);
         closeButton.setMargin(new Insets(0, 6, 0, 6));
-        closeButton.setAlignmentY(0.0f);
+        closeButton.setAlignmentY(Component.CENTER_ALIGNMENT);
         closeButton.setToolTipText("Close");
         closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -71,7 +72,7 @@ public class ToolBar {
         minimizeButton.setBorderPainted(false);
         minimizeButton.setForeground(Color.WHITE);
         minimizeButton.setMargin(new Insets(0, 6, 0, 6));
-        minimizeButton.setAlignmentY(0.0f);
+        minimizeButton.setAlignmentY(Component.CENTER_ALIGNMENT);
         minimizeButton.setToolTipText("Minimize");
         minimizeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -106,7 +107,7 @@ public class ToolBar {
         maximizeButton.setBorderPainted(false);
         maximizeButton.setForeground(Color.WHITE);
         maximizeButton.setMargin(new Insets(0, 6, 0, 6));
-        maximizeButton.setAlignmentY(0.0f);
+        maximizeButton.setAlignmentY(Component.CENTER_ALIGNMENT);
         maximizeButton.setToolTipText("Maximize");
         maximizeButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -123,6 +124,7 @@ public class ToolBar {
         JLabel titleLabel = new JLabel("Hayden's Character Generator");
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(JLabel.LEFT);
+        titleLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
 
         toolBar.add(titleLabel);
         toolBar.add(Box.createHorizontalGlue());
