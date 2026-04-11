@@ -4,23 +4,29 @@ import java.awt.Cursor;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class WindowMouseController extends MouseAdapter {
-    private static final int RESIZE_MARGIN = 14;
-    private static final double ASPECT_RATIO = 720.0 / 480.0;
-    private static final int MIN_WIDTH = 300;
-    private static final int MIN_HEIGHT = 200;
+    private static final int resizeMargin = 14;
+    private static final int dragTopInset = 5;
+    private static final int dragSideInset = 5;
+    private static final double aspectRatio = 720.0 / 480.0;
+    private static final int minWidth = 300;
+    private static final int minHeight = 200;
 
     private final BorderDisplay display;
     private Point startDrag;
     private Point startLocation;
     private Rectangle startBounds;
+    private Point pressPoint;
     private int resizeDirection = 0;
     private boolean resizingEnabled = true;
+    private boolean draggingWindow = false;
 
     public WindowMouseController(BorderDisplay display) {
         this.display = display;
@@ -28,8 +34,17 @@ public class WindowMouseController extends MouseAdapter {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        mouseMoved(e);
+        Point displayPoint = getDisplayPoint(e);
+        if (e.getComponent() == display) {
+            mouseMoved(e);
+        } else {
+            resizeDirection = 0;
+            display.setCursor(Cursor.getDefaultCursor());
+        }
+
         startDrag = e.getLocationOnScreen();
+        pressPoint = displayPoint;
+        draggingWindow = resizeDirection == 0 && isInDragRegion(pressPoint);
         display.setLiveResizing(resizeDirection != 0);
 
         JFrame frame = (JFrame) display.getTopLevelAncestor();
@@ -56,7 +71,7 @@ public class WindowMouseController extends MouseAdapter {
 
         if (resizeDirection != 0) {
             resizeFrame(frame, dx, dy);
-        } else if (startLocation != null) {
+        } else if (draggingWindow && startLocation != null) {
             frame.setLocation(startLocation.x + dx, startLocation.y + dy);
         }
     }
@@ -67,21 +82,27 @@ public class WindowMouseController extends MouseAdapter {
             return;
         }
 
+        if (e.getComponent() != display) {
+            resizeDirection = 0;
+            display.setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+
         int x = e.getX();
         int y = e.getY();
         int width = display.getWidth();
         int height = display.getHeight();
 
         int direction = 0;
-        if (y <= RESIZE_MARGIN) {
+        if (y <= resizeMargin) {
             direction |= 1;
-        } else if (y >= height - RESIZE_MARGIN) {
+        } else if (y >= height - resizeMargin) {
             direction |= 2;
         }
 
-        if (x <= RESIZE_MARGIN) {
+        if (x <= resizeMargin) {
             direction |= 4;
-        } else if (x >= width - RESIZE_MARGIN) {
+        } else if (x >= width - resizeMargin) {
             direction |= 8;
         }
 
@@ -122,8 +143,31 @@ public class WindowMouseController extends MouseAdapter {
         startDrag = null;
         startLocation = null;
         startBounds = null;
+        pressPoint = null;
+        draggingWindow = false;
         display.setLiveResizing(false);
         display.repaint();
+    }
+
+    private boolean isInDragRegion(Point point) {
+        if (point == null) {
+            return false;
+        }
+
+        int width = display.getWidth();
+        int dragRegionBottom = 30;
+        return point.y >= dragTopInset
+            && point.y <= dragRegionBottom
+            && point.x >= dragSideInset
+            && point.x <= Math.max(dragSideInset, width - dragSideInset);
+    }
+
+    private Point getDisplayPoint(MouseEvent e) {
+        Component source = e.getComponent();
+        if (source == display) {
+            return e.getPoint();
+        }
+        return SwingUtilities.convertPoint(source, e.getPoint(), display);
     }
 
     private void resizeFrame(JFrame frame, int dx, int dy) {
@@ -153,22 +197,22 @@ public class WindowMouseController extends MouseAdapter {
             double heightDelta = Math.abs((double) dy / Math.max(1, startBounds.height));
 
             if (widthDelta >= heightDelta) {
-                width = Math.max(MIN_WIDTH, rawWidth);
-                height = Math.max(MIN_HEIGHT, (int) Math.round(width / ASPECT_RATIO));
-                width = Math.max(MIN_WIDTH, (int) Math.round(height * ASPECT_RATIO));
+                width = Math.max(minWidth, rawWidth);
+                height = Math.max(minHeight, (int) Math.round(width / aspectRatio));
+                width = Math.max(minWidth, (int) Math.round(height * aspectRatio));
             } else {
-                height = Math.max(MIN_HEIGHT, rawHeight);
-                width = Math.max(MIN_WIDTH, (int) Math.round(height * ASPECT_RATIO));
-                height = Math.max(MIN_HEIGHT, (int) Math.round(width / ASPECT_RATIO));
+                height = Math.max(minHeight, rawHeight);
+                width = Math.max(minWidth, (int) Math.round(height * aspectRatio));
+                height = Math.max(minHeight, (int) Math.round(width / aspectRatio));
             }
         } else if (hasHorizontalEdge) {
-            width = Math.max(MIN_WIDTH, rawWidth);
-            height = Math.max(MIN_HEIGHT, (int) Math.round(width / ASPECT_RATIO));
-            width = Math.max(MIN_WIDTH, (int) Math.round(height * ASPECT_RATIO));
+            width = Math.max(minWidth, rawWidth);
+            height = Math.max(minHeight, (int) Math.round(width / aspectRatio));
+            width = Math.max(minWidth, (int) Math.round(height * aspectRatio));
         } else {
-            height = Math.max(MIN_HEIGHT, rawHeight);
-            width = Math.max(MIN_WIDTH, (int) Math.round(height * ASPECT_RATIO));
-            height = Math.max(MIN_HEIGHT, (int) Math.round(width / ASPECT_RATIO));
+            height = Math.max(minHeight, rawHeight);
+            width = Math.max(minWidth, (int) Math.round(height * aspectRatio));
+            height = Math.max(minHeight, (int) Math.round(width / aspectRatio));
         }
 
         int x;

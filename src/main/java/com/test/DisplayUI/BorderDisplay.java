@@ -17,19 +17,12 @@ public class BorderDisplay extends JPanel {
     private static final int topBorderHeight = 80;
     private static final int topCornerBorderWidth = 80;
     private static final int toolBarYOffset = -20;
-    private static final int FRAME_CORNER_ARC = 50;
-    private static final float BACKGROUND_TINT_HUE = Color.RGBtoHSB(233, 0, 0, null)[0];
-    private static final float MIN_TINTABLE_SATURATION = 0.08f;
-    private static final float WHITE_PRESERVE_BRIGHTNESS = 0.92f;
-    private static final float GENERATED_SATURATION_STRENGTH = 0.65f;
+    private static final int cornerRound = 50;
     private BufferedImage bt, bb, bl, br, btl, btr, bbl, bbr, bg;
     private static final long serialVersionUID = 1L;     
     private boolean liveResizing = false;
 
     public BorderDisplay() {
-        WindowMouseController mouseController = new WindowMouseController(this);
-        addMouseListener(mouseController);
-        addMouseMotionListener(mouseController);
         setDoubleBuffered(true);
     }
 
@@ -70,6 +63,9 @@ public class BorderDisplay extends JPanel {
 
 
         ToolBar toolBarWrapper = new ToolBar();
+    WindowMouseController mouseController = new WindowMouseController(canvas);
+    canvas.attachWindowMouseController(mouseController);
+    toolBarWrapper.attachWindowMouseController(mouseController);
         layered.add(toolBarWrapper.getToolBar(), JLayeredPane.PALETTE_LAYER);
 
         updateLayout(frame, layered, canvas, toolBarWrapper);
@@ -173,13 +169,18 @@ public class BorderDisplay extends JPanel {
 
         double width = Math.max(1, frame.getWidth());
         double height = Math.max(1, frame.getHeight());
-        double arc = Math.min(FRAME_CORNER_ARC, Math.min(width, height)); // ensure the arc is not larger than the frame dimensions
+        double arc = Math.min(cornerRound, Math.min(width, height)); // ensure the arc is not larger than the frame dimensions
 
         frame.setShape(new RoundRectangle2D.Double(0,0,width,height,arc,arc));
     }
 
     public void setLiveResizing(boolean liveResizing) {
         this.liveResizing = liveResizing;
+    }
+
+    public void attachWindowMouseController(WindowMouseController mouseController) {
+        addMouseListener(mouseController);
+        addMouseMotionListener(mouseController);
     }
 
 } 

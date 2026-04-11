@@ -25,6 +25,7 @@ public class ToolBar {
 
     private final JToolBar toolBar;
     private final Component rightSideGlue;
+    private final JLabel titleLabel;
 
     public ToolBar() {
         this(defaultTitle);
@@ -32,7 +33,8 @@ public class ToolBar {
 
     public ToolBar(String title, JButton... instanceButtons) {
         toolBar = createToolBarBase();
-        toolBar.add(createTitleLabel(title));
+        titleLabel = createTitleLabel(title);
+        toolBar.add(titleLabel);
         rightSideGlue = Box.createHorizontalGlue();
         toolBar.add(rightSideGlue);
 
@@ -61,6 +63,13 @@ public class ToolBar {
 
     public JToolBar getToolBar() {
         return toolBar;
+    }
+
+    public void attachWindowMouseController(WindowMouseController mouseController) {
+        toolBar.addMouseListener(mouseController);
+        toolBar.addMouseMotionListener(mouseController);
+        titleLabel.addMouseListener(mouseController);
+        titleLabel.addMouseMotionListener(mouseController);
     }
 
     private JToolBar createToolBarBase() {
@@ -99,9 +108,9 @@ public class ToolBar {
         JButton closeButton = createControlButton(
             "X",
             "Close",
-            "/close reg button.png",
-            "/close hover button.png",
-            "/close click button.png"
+            "/buttons/window-close-normal.png",
+            "/buttons/window-close-hover.png",
+            "/buttons/window-close-pressed.png"
         );
         closeButton.addActionListener(e -> System.exit(0));
         return closeButton;
@@ -111,9 +120,9 @@ public class ToolBar {
         JButton minimizeButton = createControlButton(
             "-",
             "Minimize",
-            "/minimize reg button.png",
-            "/minimize hover button.png",
-            "/minimize click button.png"
+            "/buttons/window-minimize-normal.png",
+            "/buttons/window-minimize-hover.png",
+            "/buttons/window-minimize-pressed.png"
         );
         minimizeButton.addActionListener(e -> {
             JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
@@ -130,9 +139,9 @@ public class ToolBar {
         JButton maximizeButton = createControlButton(
             "[]",
             "Maximize",
-            "/restore(max) reg button.png",
-            "/restore(max) hover button.png",
-            "/restore(max) click button.png"
+            "/buttons/window-maximize-normal.png",
+            "/buttons/window-maximize-hover.png",
+            "/buttons/window-maximize-pressed.png"
         );
         maximizeButton.addActionListener(e -> {
             JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
