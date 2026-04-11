@@ -7,8 +7,6 @@ public class GraphicsSandbox {
 
     public static void main(String[] args) throws IOException {
         BorderDisplay.main(args);
-    
-
     }
 
 

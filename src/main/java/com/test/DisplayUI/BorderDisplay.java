@@ -2,6 +2,7 @@ package com.test.DisplayUI;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -9,31 +10,26 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class BorderDisplay extends JPanel implements MouseListener, MouseMotionListener {
+public class BorderDisplay extends JPanel {
 
     // constants
 
-    private static final int TOP_BORDER_HEIGHT = 80;
-    private static final int TOP_CORNER_BORDER_WIDTH = 80;
-    private static final int TOOLBAR_Y_OFFSET = -20;
+    private static final int topBorderHeight = 80;
+    private static final int topCornerBorderWidth = 80;
+    private static final int toolBarYOffset = -20;
+    private static final int FRAME_CORNER_ARC = 50;
     private static final float BACKGROUND_TINT_HUE = Color.RGBtoHSB(233, 0, 0, null)[0];
     private static final float MIN_TINTABLE_SATURATION = 0.08f;
     private static final float WHITE_PRESERVE_BRIGHTNESS = 0.92f;
     private static final float GENERATED_SATURATION_STRENGTH = 0.65f;
     private BufferedImage bt, bb, bl, br, btl, btr, bbl, bbr, bg;
     private static final long serialVersionUID = 1L;     
-    private Point start_drag;   
-    private Point start_loc;  
-    private Rectangle startBounds;
     private boolean liveResizing = false;
-    private static final int RESIZE_MARGIN = 14;
-    private static final double ASPECT_RATIO = 720.0 / 480.0;
-    private boolean resizing = true;
-    private int resizeDirection = 0;
 
     public BorderDisplay() {
-        addMouseListener(this);
-        addMouseMotionListener(this);
+        WindowMouseController mouseController = new WindowMouseController(this);
+        addMouseListener(mouseController);
+        addMouseMotionListener(mouseController);
         setDoubleBuffered(true);
     }
 
@@ -101,7 +97,8 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Use faster interpolation while the user is actively resizing for smoother feedback.
+        // make resizing the frame faster by making rendering lower quality
+        // then restore quality when done dragging
         Object interpolation = liveResizing
             ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
             : RenderingHints.VALUE_INTERPOLATION_BILINEAR;
@@ -113,25 +110,33 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, renderMode);
 
+        // draw background image as a base
+
         if (bg != null) {
             g2d.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
 
+        // draw borders and corners. corners remain fixed while edges are stretched to fit
+        // the size of the frame as resized.
+
         if (bt != null && btl != null && btr != null && bb != null && bl != null && br != null && bbl != null && bbr != null) {
-            int leftCornerWidth = TOP_CORNER_BORDER_WIDTH;
-            int rightCornerWidth = TOP_CORNER_BORDER_WIDTH;
-            int topBottomHeight = TOP_BORDER_HEIGHT;
-            int sideHeight = Math.max(1, getHeight() - (topBottomHeight * 2));
-            int availableWidth = Math.max(1, getWidth() - leftCornerWidth - rightCornerWidth);
+            int leftCornerWidth = topCornerBorderWidth; 
+            int rightCornerWidth = topCornerBorderWidth; // corners have the same width
+            int topBottomHeight = topBorderHeight; // top border is thicker
+            int sideHeight = Math.max(1, getHeight() - (topBottomHeight * 2)); // getHeight() used for calculating
+                //resizing. Math.max used to prevent a 0 or negative height to prevent errors
+            int availableWidth = Math.max(1, getWidth() - leftCornerWidth - rightCornerWidth); // same for width, just different scaling
 
             int rightCornerX = getWidth() - rightCornerWidth;
             int bottomY = getHeight() - topBottomHeight;
 
+            // draw corners
             g2d.drawImage(btl, 0, 0, leftCornerWidth, topBottomHeight, this);
             g2d.drawImage(btr, rightCornerX, 0, rightCornerWidth, topBottomHeight, this);
             g2d.drawImage(bbl, 0, bottomY, leftCornerWidth, topBottomHeight, this);
             g2d.drawImage(bbr, rightCornerX, bottomY, rightCornerWidth, topBottomHeight, this);
 
+            // draw edges
             int drawX = leftCornerWidth;
             g2d.drawImage(bt, drawX, 0, availableWidth, topBottomHeight, this);
             g2d.drawImage(bb, drawX, bottomY, availableWidth, topBottomHeight, this);
@@ -144,161 +149,37 @@ public class BorderDisplay extends JPanel implements MouseListener, MouseMotionL
     private static void updateLayout(JFrame frame, JLayeredPane layered, BorderDisplay canvas, ToolBar toolBarWrapper) {
         int frameWidth = frame.getWidth();
         int frameHeight = frame.getHeight();
-
+        // update the bounds of the layers(layered pane, tool bar, canvas) to fit new resize
         layered.setBounds(0, 0, frameWidth, frameHeight);
         canvas.setBounds(0, 0, frameWidth, frameHeight);
         toolBarWrapper.getToolBar().setBounds(
-            TOP_CORNER_BORDER_WIDTH/2 - 15,
-            TOOLBAR_Y_OFFSET,
-            Math.max(1, frameWidth - TOP_CORNER_BORDER_WIDTH+40),
-            TOP_BORDER_HEIGHT
+            topCornerBorderWidth/2 - 15,
+            toolBarYOffset,
+            Math.max(1, frameWidth - topCornerBorderWidth+40),
+            topBorderHeight
         );
+        applyRoundedFrameShape(frame);
         canvas.repaint();
         toolBarWrapper.getToolBar().repaint();
     }
 
+    private static void applyRoundedFrameShape(JFrame frame) {
 
-    public void mousePressed(MouseEvent e) {
-        mouseMoved(e);
-        start_drag = e.getLocationOnScreen();
-        liveResizing = resizeDirection != 0;
-        JFrame frame = (JFrame) this.getTopLevelAncestor();
-        if (frame != null) {
-            start_loc = frame.getLocation();
-            startBounds = frame.getBounds();
-        }
-    }
-
-    public void mouseDragged(MouseEvent e) {
-        if (start_drag == null) {
+        // platform check for pixel transparency support to prevent any errors
+        GraphicsDevice device = frame.getGraphicsConfiguration().getDevice();
+        if (!device.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT)) {
             return;
         }
 
-        JFrame frame = (JFrame) this.getTopLevelAncestor();
-        if (frame == null || startBounds == null) {
-            return;
-        }
+        double width = Math.max(1, frame.getWidth());
+        double height = Math.max(1, frame.getHeight());
+        double arc = Math.min(FRAME_CORNER_ARC, Math.min(width, height)); // ensure the arc is not larger than the frame dimensions
 
-        Point current = e.getLocationOnScreen();
-        int dx = (int) (current.getX() - start_drag.getX());
-        int dy = (int) (current.getY() - start_drag.getY());
-
-        if (resizeDirection != 0) {
-            int minW = 300;
-            int minH = 200;
-
-            boolean hasHorizontalEdge = (resizeDirection & 4) != 0 || (resizeDirection & 8) != 0;
-            boolean hasVerticalEdge = (resizeDirection & 1) != 0 || (resizeDirection & 2) != 0;
-
-            int rawW = startBounds.width;
-            int rawH = startBounds.height;
-
-            if ((resizeDirection & 8) != 0) {
-                rawW = startBounds.width + dx;
-            }
-            if ((resizeDirection & 4) != 0) {
-                rawW = startBounds.width - dx;
-            }
-            if ((resizeDirection & 2) != 0) {
-                rawH = startBounds.height + dy;
-            }
-            if ((resizeDirection & 1) != 0) {
-                rawH = startBounds.height - dy;
-            }
-
-            int w;
-            int h;
-            if (hasHorizontalEdge && hasVerticalEdge) {
-                double widthDelta = Math.abs((double) dx / Math.max(1, startBounds.width));
-                double heightDelta = Math.abs((double) dy / Math.max(1, startBounds.height));
-
-                if (widthDelta >= heightDelta) {
-                    w = Math.max(minW, rawW);
-                    h = Math.max(minH, (int) Math.round(w / ASPECT_RATIO));
-                    w = Math.max(minW, (int) Math.round(h * ASPECT_RATIO));
-                } else {
-                    h = Math.max(minH, rawH);
-                    w = Math.max(minW, (int) Math.round(h * ASPECT_RATIO));
-                    h = Math.max(minH, (int) Math.round(w / ASPECT_RATIO));
-                }
-            } else if (hasHorizontalEdge) {
-                w = Math.max(minW, rawW);
-                h = Math.max(minH, (int) Math.round(w / ASPECT_RATIO));
-                w = Math.max(minW, (int) Math.round(h * ASPECT_RATIO));
-            } else {
-                h = Math.max(minH, rawH);
-                w = Math.max(minW, (int) Math.round(h * ASPECT_RATIO));
-                h = Math.max(minH, (int) Math.round(w / ASPECT_RATIO));
-            }
-
-            int x;
-            if ((resizeDirection & 4) != 0) {
-                x = startBounds.x + (startBounds.width - w);
-            } else if ((resizeDirection & 8) != 0) {
-                x = startBounds.x;
-            } else {
-                x = startBounds.x + (startBounds.width - w) / 2;
-            }
-
-            int y;
-            if ((resizeDirection & 1) != 0) {
-                y = startBounds.y + (startBounds.height - h);
-            } else if ((resizeDirection & 2) != 0) {
-                y = startBounds.y;
-            } else {
-                y = startBounds.y + (startBounds.height - h) / 2;
-            }
-
-            frame.setBounds(x, y, w, h);
-        } else if (start_loc != null) {
-            frame.setLocation(start_loc.x + dx, start_loc.y + dy);
-        }
+        frame.setShape(new RoundRectangle2D.Double(0,0,width,height,arc,arc));
     }
 
-    public void mouseMoved(MouseEvent e) {
-        if (!resizing) return;
-        int x = e.getX();
-        int y = e.getY();
-        int width = getWidth();
-        int height = getHeight();
-        int direction = 0;
-        if (y <= RESIZE_MARGIN) direction |= 1; // N
-        else if (y >= height - RESIZE_MARGIN) direction |= 2; // S
-        if (x <= RESIZE_MARGIN) direction |= 4; // W
-        else if (x >= width - RESIZE_MARGIN) direction |= 8; // E
-        resizeDirection = direction;
-        switch (direction) {
-            case 1: setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR)); break;
-            case 2: setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR)); break;
-            case 4: setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR)); break;
-            case 8: setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR)); break;
-            case 5: setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR)); break;
-            case 9: setCursor(Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR)); break;
-            case 6: setCursor(Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR)); break;
-            case 10: setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR)); break;
-            default: setCursor(Cursor.getDefaultCursor()); 
-            break;
-        }
+    public void setLiveResizing(boolean liveResizing) {
+        this.liveResizing = liveResizing;
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        start_drag = null;
-        start_loc = null;
-        startBounds = null;
-        liveResizing = false;
-        repaint();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
 } 
