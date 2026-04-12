@@ -14,18 +14,23 @@ public class FrameLayoutManager {
     private static final int topBorderHeight = 80;
     private static final int topCornerBorderWidth = 80;
     private static final int toolbarYOffset = -20;
+    private static final double navigationHeightRatio = 0.20;
+    private static final int minNavigationHeight = 60;
+    private static final int maxNavigationHeight = 140;
     private static final int cornerRound = 50;
 
     private final JFrame frame;
     private final JLayeredPane layeredPane;
     private final Display display;
     private final ToolBar toolbar;
+    private final NavigationBar navigationBar;
 
-    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar) {
+    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar, NavigationBar navigationBar) {
         this.frame = frame;
         this.layeredPane = layeredPane;
         this.display = display;
         this.toolbar = toolbar;
+        this.navigationBar = navigationBar;
         setupListeners();
     }
 
@@ -58,10 +63,20 @@ public class FrameLayoutManager {
             Math.max(1, frameWidth - topCornerBorderWidth + 40),
             topBorderHeight
         );
+        int navigationHeight = (int) Math.round(frameHeight * navigationHeightRatio);
+        navigationHeight = Math.max(minNavigationHeight, Math.min(maxNavigationHeight, navigationHeight));
+        int navigationY = Math.max(0, frameHeight - navigationHeight);
+        int navigationWidth = Math.max(1, frameWidth);
+        navigationBar.setBounds(0, navigationY, navigationWidth, navigationHeight);
 
         roundFrameShape();
+        layeredPane.revalidate();
+        display.revalidate();
+        navigationBar.revalidate();
+        navigationBar.repaint();
         display.repaint();
         toolbar.getToolBar().repaint();
+
     }
 
     private void roundFrameShape() {
@@ -77,7 +92,7 @@ public class FrameLayoutManager {
         frame.setShape(new RoundRectangle2D.Double(0, 0, width, height, arc, arc));
     }
 
-    public int getTopborderheight() {
+    public int getTopBorderHeight() {
         return topBorderHeight;
     }
 }

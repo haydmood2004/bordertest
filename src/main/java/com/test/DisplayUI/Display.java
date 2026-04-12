@@ -1,13 +1,11 @@
 package com.test.DisplayUI;
 
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
 public class Display extends JPanel {
-    private static final int cornerRound = 50;
     private static final long serialVersionUID = 1L;
 
     // Border images
@@ -19,6 +17,7 @@ public class Display extends JPanel {
 
     public Display() {
         setDoubleBuffered(true);
+        setLayout(null);
     }
 
     @Override
@@ -41,8 +40,15 @@ public class Display extends JPanel {
             g2d.drawImage(background, 0, 0, getWidth(), getHeight(), this);
         }
 
+    }
+
+    @Override
+    protected void paintChildren(Graphics g) {
+        super.paintChildren(g);
         if (allBordersLoaded()) {
+            Graphics2D g2d = (Graphics2D) g.create();
             drawBordersAndCorners(g2d);
+            g2d.dispose();
         }
     }
 
