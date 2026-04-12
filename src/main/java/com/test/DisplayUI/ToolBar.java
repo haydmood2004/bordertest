@@ -70,6 +70,21 @@ public class ToolBar {
         toolBar.addMouseMotionListener(mouseController);
         titleLabel.addMouseListener(mouseController);
         titleLabel.addMouseMotionListener(mouseController);
+
+        for (Component component : toolBar.getComponents()) {
+            if (component instanceof JButton) {
+                component.addMouseListener(mouseController);
+                component.addMouseMotionListener(mouseController);
+            }
+        }
+    }
+
+    public void setCursorForAllComponents(java.awt.Cursor cursor) {
+        toolBar.setCursor(cursor);
+        titleLabel.setCursor(cursor);
+        for (Component component : toolBar.getComponents()) {
+            component.setCursor(cursor);
+        }
     }
 
     private JToolBar createToolBarBase() {
