@@ -13,9 +13,6 @@ public class ApplicationLauncher {
     private static final String windowTitle = "Graphics Practice";
 
     public static void main(String[] args) throws IOException {
-        System.setProperty("sun.java2d.opengl", "True");
-        System.setProperty("sun.java2d.d3d", "False");
-
         JFrame frame = createFrame();
 
         Display display = new Display();
@@ -24,7 +21,7 @@ public class ApplicationLauncher {
         ResourceManager.BorderImages borderImages = ResourceManager.loadBorderImages();
         ResourceManager.CursorImages cursorImages = ResourceManager.loadCursorImages();
         display.setBorderImages(borderImages);
-        display.setBackgroundImage(ResourceManager.loadBackground());
+        display.setBackground(new Color(90,90,90));
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
@@ -64,10 +61,9 @@ public class ApplicationLauncher {
     }
 
     private static void initializeDisplay(Display display) {
-        display.setBackground(new Color(0, 0, 0, 0));
+        display.setBackground(new Color(0, 0,0,0));
         display.setSize(windowWidth, windowHeight);
         display.setPreferredSize(display.getSize());
-        display.setDoubleBuffered(true);
     }
 
     private static void applyCursorsToAllComponents(JFrame frame, JLayeredPane layeredPane, 

@@ -7,15 +7,12 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 public class Display extends JPanel {
-    private static final int cornerRound = 50;
     private static final long serialVersionUID = 1L;
 
     // Border images
     private BufferedImage borderTop, borderBottom, borderLeft, borderRight;
     private BufferedImage borderTopLeft, borderTopRight, borderBottomLeft, borderBottomRight;
     private BufferedImage background;
-
-    private boolean liveResizing = false;
 
     public Display() {
         setDoubleBuffered(true);
@@ -25,17 +22,6 @@ public class Display extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-
-        Object interpolation = liveResizing
-            ? RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
-            : RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-        Object renderMode = liveResizing
-            ? RenderingHints.VALUE_RENDER_SPEED
-            : RenderingHints.VALUE_RENDER_QUALITY;
-
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, interpolation);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, renderMode);
 
         if (background != null) {
             g2d.drawImage(background, 0, 0, getWidth(), getHeight(), this);
@@ -81,14 +67,6 @@ public class Display extends JPanel {
         this.borderTopRight = borders.topRight;
         this.borderBottomLeft = borders.bottomLeft;
         this.borderBottomRight = borders.bottomRight;
-    }
-
-    public void setBackgroundImage(BufferedImage bg) {
-        this.background = bg;
-    }
-
-    public void setLiveResizing(boolean liveResizing) {
-        this.liveResizing = liveResizing;
     }
 
     public void attachWindowMouseController(WindowMouseController mouseController) {

@@ -29,10 +29,4 @@ public class CursorManager {
             return Cursor.getDefaultCursor();
         }
     }
-
-    public static void applyCursorToComponent(java.awt.Component component, Cursor cursor) {
-        if (component != null && cursor != null) {
-            component.setCursor(cursor);
-        }
-    }
 }
