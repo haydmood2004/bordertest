@@ -76,6 +76,10 @@ public class Display extends JPanel {
         this.borderBottomRight = borders.bottomRight;
     }
 
+    public void setBackgroundImage(BufferedImage bg) {
+        this.background = bg;
+    }
+
     public void attachWindowMouseController(WindowMouseController mouseController) {
         addMouseListener(mouseController);
         addMouseMotionListener(mouseController);

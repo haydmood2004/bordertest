@@ -21,7 +21,7 @@ public class ApplicationLauncher {
         ResourceManager.BorderImages borderImages = ResourceManager.loadBorderImages();
         ResourceManager.CursorImages cursorImages = ResourceManager.loadCursorImages();
         display.setBorderImages(borderImages);
-        display.setBackground(new Color(90,90,90));
+        display.setBackgroundImage(ResourceManager.loadBackground());
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
@@ -31,22 +31,19 @@ public class ApplicationLauncher {
         layeredPane.add(display, JLayeredPane.DEFAULT_LAYER);
 
         ToolBar toolbar = new ToolBar();
-        NavigationBar navigationBar = new NavigationBar();
         WindowMouseController mouseController = new WindowMouseController(display);
 
         display.attachWindowMouseController(mouseController);
         toolbar.attachWindowMouseController(mouseController);
-        display.add(navigationBar);
         layeredPane.add(toolbar.getToolBar(), JLayeredPane.PALETTE_LAYER);
-        layeredPane.setPosition(display, 0);
 
-        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, navigationBar);
+        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar);
         layoutManager.updateLayout();
 
         Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(0, 0));
         Cursor clickCursor = CursorManager.createCustomCursor(cursorImages.click, new Point(0, 0));
 
-        applyCursorsToAllComponents(frame, layeredPane, display, toolbar, navigationBar, defaultCursor);
+        applyCursorsToAllComponents(frame, layeredPane, display, toolbar, defaultCursor);
         mouseController.setCursors(defaultCursor, clickCursor);
 
         frame.pack();
@@ -70,11 +67,10 @@ public class ApplicationLauncher {
     }
 
     private static void applyCursorsToAllComponents(JFrame frame, JLayeredPane layeredPane, 
-                                                     Display display, ToolBar toolbar, NavigationBar navigationBar, Cursor cursor) {
+                                                     Display display, ToolBar toolbar, Cursor cursor) {
         frame.setCursor(cursor);
         layeredPane.setCursor(cursor);
         display.setCursor(cursor);
         toolbar.setCursorForAllComponents(cursor);
-        navigationBar.setCursor(cursor);
     }
 }

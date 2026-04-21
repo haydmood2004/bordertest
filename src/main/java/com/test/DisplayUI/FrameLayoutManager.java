@@ -20,14 +20,12 @@ public class FrameLayoutManager {
     private final JLayeredPane layeredPane;
     private final Display display;
     private final ToolBar toolbar;
-    private final NavigationBar navigationBar;
 
-    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar, NavigationBar navigationBar) {
+    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar) {
         this.frame = frame;
         this.layeredPane = layeredPane;
         this.display = display;
         this.toolbar = toolbar;
-        this.navigationBar = navigationBar;
         setupListeners();
     }
 
@@ -60,17 +58,10 @@ public class FrameLayoutManager {
             Math.max(1, frameWidth - topCornerBorderWidth + 40),
             topBorderHeight
         );
-        int navigationHeight = (int) Math.round(frameHeight * navigationHeightRatio);
-        navigationHeight = Math.max(minNavigationHeight, Math.min(maxNavigationHeight, navigationHeight));
-        int navigationY = Math.max(0, frameHeight - navigationHeight);
-        int navigationWidth = Math.max(1, frameWidth);
-        navigationBar.setBounds(0, navigationY, navigationWidth, navigationHeight);
 
         roundFrameShape();
         layeredPane.revalidate();
         display.revalidate();
-        navigationBar.revalidate();
-        navigationBar.repaint();
         display.repaint();
         toolbar.getToolBar().repaint();
 
