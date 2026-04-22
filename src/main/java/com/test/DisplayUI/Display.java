@@ -1,7 +1,6 @@
 package com.test.DisplayUI;
 
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
@@ -12,7 +11,6 @@ public class Display extends JPanel {
     // Border images
     private BufferedImage borderTop, borderBottom, borderLeft, borderRight;
     private BufferedImage borderTopLeft, borderTopRight, borderBottomLeft, borderBottomRight;
-    private BufferedImage background;
 
     public Display() {
         setDoubleBuffered(true);
@@ -22,10 +20,6 @@ public class Display extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-
-        if (background != null) {
-            g2d.drawImage(background, 0, 0, getWidth(), getHeight(), this);
-        }
 
         if (allBordersLoaded()) {
             drawBordersAndCorners(g2d);

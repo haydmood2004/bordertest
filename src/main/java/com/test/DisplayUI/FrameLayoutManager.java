@@ -1,6 +1,7 @@
 package com.test.DisplayUI;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -19,12 +20,15 @@ public class FrameLayoutManager {
     private final JLayeredPane layeredPane;
     private final Display display;
     private final ToolBar toolbar;
+    private final MenuBar menuBar;
 
-    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar) {
+
+    public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar, MenuBar menuBar) {
         this.frame = frame;
         this.layeredPane = layeredPane;
         this.display = display;
         this.toolbar = toolbar;
+        this.menuBar = menuBar;
         setupListeners();
     }
 
@@ -57,10 +61,13 @@ public class FrameLayoutManager {
             Math.max(1, frameWidth - topCornerBorderWidth + 40),
             topBorderHeight
         );
+        menuBar.getMenuBar().setPreferredSize(new Dimension (frameWidth / 12, frameHeight));
+        menuBar.getMenuBar().setBounds(0, 0, 60, frameHeight);
 
         roundFrameShape();
         display.repaint();
         toolbar.getToolBar().repaint();
+        menuBar.getMenuBar().repaint();
     }
 
     private void roundFrameShape() {
