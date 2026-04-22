@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 
 public class ToolBar {
     private static final int ctrlButtonSize = 25;
+    private ButtonControl b = new ButtonControl();
     private static final String defaultTitle = "Character Generator";
 
     private final JToolBar toolBar;
@@ -87,7 +88,7 @@ public class ToolBar {
         }
     }
 
-    private JToolBar createToolBarBase() {
+    public JToolBar createToolBarBase() {
         JToolBar bar = new JToolBar();
         bar.setOrientation(JToolBar.HORIZONTAL);
         bar.setFloatable(false);
@@ -110,7 +111,7 @@ public class ToolBar {
         return titleLabel;
     }
 
-    private void addInstanceButtons(JButton... buttons) {
+    public void addInstanceButtons(JButton... buttons) {
         if (buttons == null) {
             return;
         }
@@ -120,7 +121,7 @@ public class ToolBar {
     }
 
     private JButton createCloseButton() {
-        JButton closeButton = createControlButton(
+        JButton closeButton = b.createControlButton(
             "X",
             "Close",
             "/buttons/window-close-normal.png",
@@ -132,7 +133,7 @@ public class ToolBar {
     }
 
     private JButton createMinimizeButton() {
-        JButton minimizeButton = createControlButton(
+        JButton minimizeButton = b.createControlButton(
             "-",
             "Minimize",
             "/buttons/window-minimize-normal.png",
@@ -151,7 +152,7 @@ public class ToolBar {
     }
 
     private JButton createMaximizeButton() {
-        JButton maximizeButton = createControlButton(
+        JButton maximizeButton = b.createControlButton(
             "[]",
             "Maximize",
             "/buttons/window-maximize-normal.png",
@@ -171,93 +172,5 @@ public class ToolBar {
             }
         });
         return maximizeButton;
-    }
-
-    private JButton createControlButton(String fallbackText, String tooltip, String regularIconPath, String hoverIconPath,
-            String pressedIconPath) {
-        JButton button = new JButton(fallbackText);
-
-        ImageIcon regularIcon = loadScaledIcon(regularIconPath, ctrlButtonSize, ctrlButtonSize);
-        ImageIcon hoverIcon = loadScaledIcon(hoverIconPath, ctrlButtonSize, ctrlButtonSize);
-        ImageIcon pressedIcon = loadScaledIcon(pressedIconPath, ctrlButtonSize, ctrlButtonSize);
-
-        if (regularIcon != null) {
-            button.setText("");
-            button.setIcon(regularIcon);
-        }
-        if (hoverIcon != null) {
-            button.setRolloverIcon(hoverIcon);
-        }
-        if (pressedIcon != null) {
-            button.setPressedIcon(pressedIcon);
-        }
-
-        button.setRolloverEnabled(hoverIcon != null);
-        installIconStateMouseHandler(button, regularIcon, hoverIcon, pressedIcon);
-
-        styleControlButton(button, tooltip);
-        return button;
-    }
-
-    private void installIconStateMouseHandler(JButton button, ImageIcon regularIcon, ImageIcon hoverIcon,
-            ImageIcon pressedIcon) {
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (hoverIcon != null) {
-                    button.setIcon(hoverIcon);
-                }
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (regularIcon != null) {
-                    button.setIcon(regularIcon);
-                }
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (pressedIcon != null) {
-                    button.setIcon(pressedIcon);
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (hoverIcon != null && button.contains(e.getPoint())) {
-                    button.setIcon(hoverIcon);
-                } else if (regularIcon != null) {
-                    button.setIcon(regularIcon);
-                }
-            }
-        });
-    }
-
-    private void styleControlButton(JButton button, String tooltip) {
-        button.setFocusable(false);
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
-        button.setBorderPainted(false);
-        button.setForeground(Color.WHITE);
-        button.setMargin(new Insets(0, 0, 0, 0));
-        button.setAlignmentY(Component.CENTER_ALIGNMENT);
-
-        Dimension controlSize = new Dimension(ctrlButtonSize, ctrlButtonSize);
-        button.setPreferredSize(controlSize);
-        button.setMinimumSize(controlSize);
-        button.setMaximumSize(controlSize);
-        button.setToolTipText(tooltip);
-    }
-
-    private ImageIcon loadScaledIcon(String resourcePath, int width, int height) {
-        URL resource = ToolBar.class.getResource(resourcePath);
-        if (resource == null) {
-            return null;
-        }
-        ImageIcon icon = new ImageIcon(resource);
-        Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
     }
 }

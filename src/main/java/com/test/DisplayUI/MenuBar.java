@@ -16,27 +16,64 @@ import javax.swing.SwingUtilities;
 import javax.swing.*;
 import java.awt.*;
 
-public class MenuBar extends JPanel{ 
-    private final JFrame frame;
-    private JPanel menuBar = new JPanel() {
-            @Override
-            public void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                int width = 60;
-                int height = frame.getHeight();
-                Color color1 = new Color(146, 6,99);
-                Color color2 = color1.darker();
-                GradientPaint gp = new GradientPaint(0, 0, color1, 0, height, color2);
-                g2d.setPaint(gp);
-                g2d.fillRect(0, 0, width, height);
-            }
-        };
+public class MenuBar { 
+    private JToolBar menuBar = new JToolBar();
+    private Component rightSideGlue;
+    private ButtonControl b = new ButtonControl();
 
-    public MenuBar() {
-        this.frame = new JFrame();
-        this.menuBar = new JPanel();
-        menuBar.setLayout(null);
+
+    public MenuBar(JToolBar menuBar) {
+        this.menuBar = menuBar;
+    }
+
+    public MenuBar(JButton... instanceButtons) {
+        menuBar = createToolBarBase();
+        rightSideGlue = Box.createHorizontalGlue();
+        menuBar.add(rightSideGlue);
+        menuBar.setOrientation(JToolBar.VERTICAL);
+        menuBar.setAlignmentY(Component.CENTER_ALIGNMENT);
+        menuBar.setMargin(new Insets(0, 0, 0, 0));
+        menuBar.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        addInstanceButtons(instanceButtons);
+
+        menuBar.add(bodyButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(faceButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(hairButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(topButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(bottomButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(fullDressButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(shoeButton());
+        menuBar.addSeparator(new Dimension(5,0));
+        menuBar.add(accessoryButton());
+    }
+
+    public void addInstanceButton(JButton button) {
+        if (button == null) {
+            return;
+        }
+
+        button.setAlignmentY(Component.CENTER_ALIGNMENT);
+        int glueIndex = menuBar.getComponentZOrder(rightSideGlue);
+        int insertIndex = (glueIndex >= 0) ? glueIndex : menuBar.getComponentCount();
+        menuBar.add(button, insertIndex);
+        menuBar.revalidate();
+        menuBar.repaint();
+    }
+
+        public void addInstanceButtons(JButton... buttons) {
+        if (buttons == null) {
+            return;
+        }
+        for (JButton button : buttons) {
+            addInstanceButton(button);
+        }
     }
 
     public void attachWindowMouseController(WindowMouseController mouseController) {
@@ -51,7 +88,119 @@ public class MenuBar extends JPanel{
         }
     }
 
-    public JPanel getMenuBar() {
+        public void setCursorForAllComponents(java.awt.Cursor cursor) {
+        menuBar.setCursor(cursor);
+        for (Component component : menuBar.getComponents()) {
+            component.setCursor(cursor);
+        }
+    }
+
+    public JToolBar createToolBarBase() {
+        JToolBar menu = new JToolBar();
+        menu.setOrientation(JToolBar.HORIZONTAL);
+        menu.setFloatable(false);
+        menu.setRollover(true);
+        menu.setBorderPainted(false);
+        menu.setOpaque(true);
+        menu.setBackground(new Color(98, 3, 49));
+        menu.setAlignmentY(Component.CENTER_ALIGNMENT);
+        menu.setMargin(new Insets(0, 0, 0, 0));
+        menu.setAlignmentX(JToolBar.LEFT);
+        menu.setVisible(true);
+        return menu;
+    }
+
+    public JButton bodyButton() {
+        JButton bodyButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return bodyButton;
+    }
+
+    public JButton faceButton() {
+        JButton faceButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return faceButton;
+    }
+
+    public JButton hairButton() {
+        JButton hairButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return hairButton;
+    }
+
+    public JButton topButton() {
+        JButton topButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return topButton;
+    }
+
+    public JButton bottomButton() {
+        JButton bottomButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return bottomButton;
+    }
+
+    public JButton fullDressButton() {
+        JButton fullDressButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return fullDressButton;
+    }
+
+    public JButton shoeButton() {
+        JButton shoeButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return shoeButton;
+    }
+
+        public JButton accessoryButton() {
+        JButton accessoryButton = b.createControlButton(
+            "Body",
+            "Body",
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png"
+        );
+        return accessoryButton;
+    }
+
+    public JToolBar getMenuBar() {
         return menuBar;
     }
+
+    
 }
