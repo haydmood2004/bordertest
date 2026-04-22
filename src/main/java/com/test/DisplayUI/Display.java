@@ -14,6 +14,7 @@ public class Display extends JPanel {
 
     public Display() {
         setDoubleBuffered(true);
+        setLayout(null);
     }
 
     @Override
@@ -21,8 +22,15 @@ public class Display extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+    }
+
+    @Override
+    protected void paintChildren(Graphics g) {
+        super.paintChildren(g);
         if (allBordersLoaded()) {
+            Graphics2D g2d = (Graphics2D) g.create();
             drawBordersAndCorners(g2d);
+            g2d.dispose();
         }
     }
 
@@ -61,6 +69,10 @@ public class Display extends JPanel {
         this.borderTopRight = borders.topRight;
         this.borderBottomLeft = borders.bottomLeft;
         this.borderBottomRight = borders.bottomRight;
+    }
+
+    public void setBackgroundImage(BufferedImage bg) {
+        this.background = bg;
     }
 
     public void attachWindowMouseController(WindowMouseController mouseController) {

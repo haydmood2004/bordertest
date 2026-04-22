@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch ApplicationLauncher",
+            "request": "launch",
+            "mainClass": "com.test.DisplayUI.ApplicationLauncher",
+            "projectName": "bordertest",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": [],
+            "vmArgs": "",
+            "env": {},
+            "classPaths": [
+                "${workspaceFolder}/target/classes",
+                "${workspaceFolder}/src/main/resources"
+            ]
+        }
+    ]
+}
