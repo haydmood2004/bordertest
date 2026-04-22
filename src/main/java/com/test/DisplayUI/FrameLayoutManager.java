@@ -14,6 +14,7 @@ public class FrameLayoutManager {
     private static final int topBorderHeight = 80;
     private static final int topCornerBorderWidth = 80;
     private static final int toolbarYOffset = -20;
+    private static final int cornerRound = 50;
 
     private final JFrame frame;
     private final JLayeredPane layeredPane;
@@ -59,8 +60,11 @@ public class FrameLayoutManager {
         );
 
         roundFrameShape();
+        layeredPane.revalidate();
+        display.revalidate();
         display.repaint();
         toolbar.getToolBar().repaint();
+
     }
 
     private void roundFrameShape() {
@@ -74,5 +78,9 @@ public class FrameLayoutManager {
         double arc = Math.min(50, Math.min(width, height));
 
         frame.setShape(new RoundRectangle2D.Double(0, 0, width, height, arc, arc));
+    }
+
+    public int getTopborderheight() {
+        return topBorderHeight;
     }
 }

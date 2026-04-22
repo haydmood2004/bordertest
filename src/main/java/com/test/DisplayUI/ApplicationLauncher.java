@@ -21,7 +21,7 @@ public class ApplicationLauncher {
         ResourceManager.BorderImages borderImages = ResourceManager.loadBorderImages();
         ResourceManager.CursorImages cursorImages = ResourceManager.loadCursorImages();
         display.setBorderImages(borderImages);
-        display.setBackground(new Color(90,90,90));
+        display.setBackgroundImage(ResourceManager.loadBackground());
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
