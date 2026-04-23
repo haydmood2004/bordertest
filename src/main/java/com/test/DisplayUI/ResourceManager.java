@@ -17,10 +17,6 @@ public class ResourceManager {
         public BufferedImage regular, click;
     }
 
-    public static BufferedImage loadBackground() throws IOException {
-        return ImageIO.read(new File(resourceBase + "/background base.png"));
-    }
-
     public static BorderImages loadBorderImages() throws IOException {
         BorderImages borders = new BorderImages();
         borders.top = ImageIO.read(new File(resourceBase + "/edges/Border CG T.png"));

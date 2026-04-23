@@ -5,76 +5,55 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.Objects;
 
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.*;
 import java.awt.*;
 
 public class MenuBar { 
-    private JToolBar menuBar = new JToolBar();
+    private JPanel menuBar = new JPanel();
     private Component rightSideGlue;
     private ButtonControl b = new ButtonControl();
 
-
-    public MenuBar(JToolBar menuBar) {
+    public MenuBar(JPanel menuBar) {
         this.menuBar = menuBar;
     }
 
-    public MenuBar(JButton... instanceButtons) {
-        menuBar = createToolBarBase();
-        rightSideGlue = Box.createHorizontalGlue();
-        menuBar.add(rightSideGlue);
-        menuBar.setOrientation(JToolBar.VERTICAL);
-        menuBar.setAlignmentY(Component.CENTER_ALIGNMENT);
-        menuBar.setMargin(new Insets(0, 0, 0, 0));
-        menuBar.setAlignmentX(Component.RIGHT_ALIGNMENT);
+public MenuBar() {
+    menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.Y_AXIS));
+    menuBar.setBackground(new Color(98, 3, 49));
+    menuBar.setOpaque(true);
+    menuBar.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 7));
 
-        addInstanceButtons(instanceButtons);
+    menuBar.add(Box.createVerticalGlue());
 
-        menuBar.add(bodyButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(faceButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(hairButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(topButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(bottomButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(fullDressButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(shoeButton());
-        menuBar.addSeparator(new Dimension(5,0));
-        menuBar.add(accessoryButton());
-    }
+    addRightAligned(menuBar, bodyButton());
+    menuBar.add(Box.createVerticalGlue());
 
-    public void addInstanceButton(JButton button) {
-        if (button == null) {
-            return;
-        }
+    addRightAligned(menuBar, faceButton());
+    menuBar.add(Box.createVerticalGlue());
 
-        button.setAlignmentY(Component.CENTER_ALIGNMENT);
-        int glueIndex = menuBar.getComponentZOrder(rightSideGlue);
-        int insertIndex = (glueIndex >= 0) ? glueIndex : menuBar.getComponentCount();
-        menuBar.add(button, insertIndex);
-        menuBar.revalidate();
-        menuBar.repaint();
-    }
+    addRightAligned(menuBar, hairButton());
+    menuBar.add(Box.createVerticalGlue());
 
-        public void addInstanceButtons(JButton... buttons) {
-        if (buttons == null) {
-            return;
-        }
-        for (JButton button : buttons) {
-            addInstanceButton(button);
-        }
-    }
+    addRightAligned(menuBar, topButton());
+    menuBar.add(Box.createVerticalGlue());
+
+    addRightAligned(menuBar, bottomButton());
+    menuBar.add(Box.createVerticalGlue());
+
+    addRightAligned(menuBar, fullDressButton());
+    menuBar.add(Box.createVerticalGlue());
+
+    addRightAligned(menuBar, shoeButton());
+    menuBar.add(Box.createVerticalGlue());
+
+    addRightAligned(menuBar, accessoryButton());
+    menuBar.add(Box.createVerticalGlue());
+}
+
+private void addRightAligned(JPanel panel, JButton button) {
+    button.setAlignmentX(Component.RIGHT_ALIGNMENT);
+    panel.add(button);
+}
 
     public void attachWindowMouseController(WindowMouseController mouseController) {
         menuBar.addMouseListener(mouseController);
@@ -93,21 +72,6 @@ public class MenuBar {
         for (Component component : menuBar.getComponents()) {
             component.setCursor(cursor);
         }
-    }
-
-    public JToolBar createToolBarBase() {
-        JToolBar menu = new JToolBar();
-        menu.setOrientation(JToolBar.HORIZONTAL);
-        menu.setFloatable(false);
-        menu.setRollover(true);
-        menu.setBorderPainted(false);
-        menu.setOpaque(true);
-        menu.setBackground(new Color(98, 3, 49));
-        menu.setAlignmentY(Component.CENTER_ALIGNMENT);
-        menu.setMargin(new Insets(0, 0, 0, 0));
-        menu.setAlignmentX(JToolBar.LEFT);
-        menu.setVisible(true);
-        return menu;
     }
 
     public JButton bodyButton() {
@@ -198,7 +162,7 @@ public class MenuBar {
         return accessoryButton;
     }
 
-    public JToolBar getMenuBar() {
+    public JPanel getMenuBar() {
         return menuBar;
     }
 
