@@ -8,52 +8,112 @@ import java.util.Objects;
 import javax.swing.*;
 import java.awt.*;
 
-public class MenuBar { 
+public class MenuBar {
     private JPanel menuBar = new JPanel();
-    private Component rightSideGlue;
     private ButtonControl b = new ButtonControl();
 
-    public MenuBar(JPanel menuBar) {
-        this.menuBar = menuBar;
+    private JButton bodyButton;
+    private JButton faceButton;
+    private JButton hairButton;
+    private JButton topButton;
+    private JButton bottomButton;
+    private JButton fullDressButton;
+    private JButton shoeButton;
+    private JButton accessoryButton;
+
+    public MenuBar() {
+        setupMenuBar();
+        createButtons();
+        addButtons();
     }
 
-public MenuBar() {
-    menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.Y_AXIS));
-    menuBar.setBackground(new Color(98, 3, 49));
-    menuBar.setOpaque(true);
-    menuBar.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 7));
+    private void setupMenuBar() {
+        menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.Y_AXIS));
+        menuBar.setBackground(new Color(98, 3, 49));
+        menuBar.setOpaque(true);
 
-    menuBar.add(Box.createVerticalGlue());
+        // padding from edges (important!)
+        menuBar.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 7));
+    }
 
-    addRightAligned(menuBar, bodyButton());
-    menuBar.add(Box.createVerticalGlue());
+    public void addInstanceButton(JButton button) {
+        if (button == null) {
+            return;
+        }
 
-    addRightAligned(menuBar, faceButton());
-    menuBar.add(Box.createVerticalGlue());
+        button.setAlignmentY(Component.CENTER_ALIGNMENT);
+        int glueIndex = menuBar.getComponentZOrder(Box.createVerticalGlue());
+        int insertIndex = (glueIndex >= 0) ? glueIndex : menuBar.getComponentCount();
+        menuBar.add(button, insertIndex);
+        menuBar.revalidate();
+        menuBar.repaint();
+    }
 
-    addRightAligned(menuBar, hairButton());
-    menuBar.add(Box.createVerticalGlue());
 
-    addRightAligned(menuBar, topButton());
-    menuBar.add(Box.createVerticalGlue());
+    public void addInstanceButtons(JButton... buttons) {
+        if (buttons == null) {
+            return;
+        }
+        for (JButton button : buttons) {
+            addInstanceButton(button);
+        }
+    }
 
-    addRightAligned(menuBar, bottomButton());
-    menuBar.add(Box.createVerticalGlue());
+    private void createButtons() {
+        bodyButton = createButton("Customize Body");
+        faceButton = createButton("Customize Face");
+        hairButton = createButton("Customize Hair");
+        topButton = createButton("Customize Top Clothing");
+        bottomButton = createButton("Customize Bottom Clothing");
+        fullDressButton = createButton("Customize Outfit");
+        shoeButton = createButton("Customize Shoes");
+        accessoryButton = createButton("Customize Accessories");
+    }
 
-    addRightAligned(menuBar, fullDressButton());
-    menuBar.add(Box.createVerticalGlue());
+    private JButton createButton(String tooltip) {
+        return b.createControlButton(
+            "",
+            tooltip,
+            "/buttons/default button reg.png",
+            "/buttons/default button hover.png",
+            "/buttons/default button click.png",
+            40
+        );
+    }
 
-    addRightAligned(menuBar, shoeButton());
-    menuBar.add(Box.createVerticalGlue());
+    private void addButtons() {
+        menuBar.add(Box.createVerticalGlue());
 
-    addRightAligned(menuBar, accessoryButton());
-    menuBar.add(Box.createVerticalGlue());
-}
+        addRightAligned(bodyButton);
+        menuBar.add(Box.createVerticalGlue());
 
-private void addRightAligned(JPanel panel, JButton button) {
-    button.setAlignmentX(Component.RIGHT_ALIGNMENT);
-    panel.add(button);
-}
+        addRightAligned(faceButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(hairButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(topButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(bottomButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(fullDressButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(shoeButton);
+        menuBar.add(Box.createVerticalGlue());
+
+        addRightAligned(accessoryButton);
+
+        menuBar.add(Box.createVerticalGlue());
+    }
+
+    private void addRightAligned(JButton button) {
+        button.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        menuBar.add(button);
+    }
 
     public void attachWindowMouseController(WindowMouseController mouseController) {
         menuBar.addMouseListener(mouseController);
@@ -67,99 +127,11 @@ private void addRightAligned(JPanel panel, JButton button) {
         }
     }
 
-        public void setCursorForAllComponents(java.awt.Cursor cursor) {
+        public void setCursorForAllComponents(Cursor cursor) {
         menuBar.setCursor(cursor);
         for (Component component : menuBar.getComponents()) {
             component.setCursor(cursor);
         }
-    }
-
-    public JButton bodyButton() {
-        JButton bodyButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return bodyButton;
-    }
-
-    public JButton faceButton() {
-        JButton faceButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return faceButton;
-    }
-
-    public JButton hairButton() {
-        JButton hairButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return hairButton;
-    }
-
-    public JButton topButton() {
-        JButton topButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return topButton;
-    }
-
-    public JButton bottomButton() {
-        JButton bottomButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return bottomButton;
-    }
-
-    public JButton fullDressButton() {
-        JButton fullDressButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return fullDressButton;
-    }
-
-    public JButton shoeButton() {
-        JButton shoeButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return shoeButton;
-    }
-
-        public JButton accessoryButton() {
-        JButton accessoryButton = b.createControlButton(
-            "Body",
-            "Body",
-            "/buttons/default button reg.png",
-            "/buttons/default button hover.png",
-            "/buttons/default button click.png"
-        );
-        return accessoryButton;
     }
 
     public JPanel getMenuBar() {

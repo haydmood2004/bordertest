@@ -39,9 +39,10 @@ public class ApplicationLauncher {
         display.attachWindowMouseController(mouseController);
         toolbar.attachWindowMouseController(mouseController);
         menuBar.attachWindowMouseController(mouseController);
-        layeredPane.add(menuBar.getMenuBar(), JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(menuBar.getMenuBar(), JLayeredPane.POPUP_LAYER-1);
         layeredPane.add(toolbar.getToolBar(), JLayeredPane.POPUP_LAYER);
-        layeredPane.setLayer(frame.getContentPane(), JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(display.getDisplay(), JLayeredPane.DEFAULT_LAYER);
+        //layeredPane.setLayer(frame.getContentPane(), JLayeredPane.POPUP_LAYER);
 
         FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar);
         layoutManager.updateLayout();
@@ -51,7 +52,7 @@ public class ApplicationLauncher {
         Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(0, 0));
         Cursor clickCursor = CursorManager.createCustomCursor(cursorImages.click, new Point(0, 0));
 
-        applyCursorsToAllComponents(frame, layeredPane, display, toolbar, defaultCursor);
+        applyCursorsToAllComponents(frame, layeredPane, display, toolbar, defaultCursor, menuBar);
         mouseController.setCursors(defaultCursor, clickCursor);
 
         frame.pack();
@@ -75,10 +76,11 @@ public class ApplicationLauncher {
     }
 
     private static void applyCursorsToAllComponents(JFrame frame, JLayeredPane layeredPane, 
-                                                     Display display, ToolBar toolbar, Cursor cursor) {
+                                                     Display display, ToolBar toolbar, Cursor cursor, MenuBar menuBar) {
         frame.setCursor(cursor);
         layeredPane.setCursor(cursor);
         display.setCursor(cursor);
         toolbar.setCursorForAllComponents(cursor);
+        menuBar.setCursorForAllComponents(cursor);
     }
 }

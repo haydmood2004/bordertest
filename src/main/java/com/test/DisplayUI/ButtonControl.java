@@ -6,17 +6,15 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Insets;
 import java.net.URL;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 public class ButtonControl {
-    private static final int ctrlButtonSize = 40;
 
-    public JButton createControlButton(String fallbackText, String tooltip, String regularIconPath, String hoverIconPath,
-            String pressedIconPath) {
+    public JButton createControlButton(String fallbackText, String tooltip, String regularIconPath, String hoverIconPath, String pressedIconPath, int ctrlButtonSize) {
+
         JButton button = new JButton(fallbackText);
 
         ImageIcon regularIcon = loadScaledIcon(regularIconPath, ctrlButtonSize, ctrlButtonSize);
@@ -34,49 +32,15 @@ public class ButtonControl {
             button.setPressedIcon(pressedIcon);
         }
 
-        button.setRolloverEnabled(hoverIcon != null);
-        installIconStateMouseHandler(button, regularIcon, hoverIcon, pressedIcon);
+        styleControlButton(button, tooltip, ctrlButtonSize);
 
-        styleControlButton(button, tooltip);
+        // Let Swing manage state changes
+        button.setRolloverEnabled(true);
+
         return button;
     }
 
-    public void installIconStateMouseHandler(JButton button, ImageIcon regularIcon, ImageIcon hoverIcon,
-            ImageIcon pressedIcon) {
-        button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (hoverIcon != null) {
-                    button.setIcon(hoverIcon);
-                }
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (regularIcon != null) {
-                    button.setIcon(regularIcon);
-                }
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (pressedIcon != null) {
-                    button.setIcon(pressedIcon);
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (hoverIcon != null && button.contains(e.getPoint())) {
-                    button.setIcon(hoverIcon);
-                } else if (regularIcon != null) {
-                    button.setIcon(regularIcon);
-                }
-            }
-        });
-    }
-
-    public void styleControlButton(JButton button, String tooltip) {
+    public void styleControlButton(JButton button, String tooltip, int ctrlButtonSize) {
         button.setFocusable(false);
         button.setFocusPainted(false);
         button.setOpaque(false);
@@ -86,18 +50,25 @@ public class ButtonControl {
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setAlignmentY(Component.CENTER_ALIGNMENT);
 
+        // helps rollover/pressed state behave more predictably
+        button.setBorder(BorderFactory.createEmptyBorder());
+
         Dimension controlSize = new Dimension(ctrlButtonSize, ctrlButtonSize);
         button.setPreferredSize(controlSize);
         button.setMinimumSize(controlSize);
         button.setMaximumSize(controlSize);
         button.setToolTipText(tooltip);
+
     }
 
     public ImageIcon loadScaledIcon(String resourcePath, int width, int height) {
-        URL resource = ToolBar.class.getResource(resourcePath);
+        URL resource = ButtonControl.class.getResource(resourcePath);
+
         if (resource == null) {
+            System.out.println("Missing resource: " + resourcePath);
             return null;
         }
+
         ImageIcon icon = new ImageIcon(resource);
         Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);

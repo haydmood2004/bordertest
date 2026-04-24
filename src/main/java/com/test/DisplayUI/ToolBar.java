@@ -2,6 +2,7 @@ package com.test.DisplayUI;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
@@ -20,7 +21,6 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 public class ToolBar {
-    private static final int ctrlButtonSize = 25;
     private ButtonControl b = new ButtonControl();
     private static final String defaultTitle = "Character Generator";
 
@@ -41,11 +41,11 @@ public class ToolBar {
 
         addInstanceButtons(instanceButtons);
 
-        toolBar.add(createMinimizeButton());
+        toolBar.add(createMinimizeButton("Minimize"));
         toolBar.addSeparator(new Dimension(5,0));
-        toolBar.add(createMaximizeButton());
+        toolBar.add(createMaximizeButton("Maximize"));
         toolBar.addSeparator(new Dimension(5, 0));
-        toolBar.add(createCloseButton());
+        toolBar.add(createCloseButton("Close"));
         toolBar.addSeparator(new Dimension(10,0));
     }
 
@@ -80,7 +80,7 @@ public class ToolBar {
         }
     }
 
-    public void setCursorForAllComponents(java.awt.Cursor cursor) {
+    public void setCursorForAllComponents(Cursor cursor) {
         toolBar.setCursor(cursor);
         titleLabel.setCursor(cursor);
         for (Component component : toolBar.getComponents()) {
@@ -120,25 +120,27 @@ public class ToolBar {
         }
     }
 
-    private JButton createCloseButton() {
+    private JButton createCloseButton(String tooltip) {
         JButton closeButton = b.createControlButton(
             "X",
-            "Close",
+            tooltip,
             "/buttons/window-close-normal.png",
             "/buttons/window-close-hover.png",
-            "/buttons/window-close-pressed.png"
+            "/buttons/window-close-pressed.png",
+            25
         );
         closeButton.addActionListener(e -> System.exit(0));
         return closeButton;
     }
 
-    private JButton createMinimizeButton() {
+    private JButton createMinimizeButton(String tooltip) {
         JButton minimizeButton = b.createControlButton(
-            "-",
-            "Minimize",
+            "X",
+            tooltip,
             "/buttons/window-minimize-normal.png",
             "/buttons/window-minimize-hover.png",
-            "/buttons/window-minimize-pressed.png"
+            "/buttons/window-minimize-pressed.png",
+            25
         );
         minimizeButton.addActionListener(e -> {
             JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
@@ -151,13 +153,14 @@ public class ToolBar {
         return minimizeButton;
     }
 
-    private JButton createMaximizeButton() {
+    private JButton createMaximizeButton(String tooltip) {
         JButton maximizeButton = b.createControlButton(
-            "[]",
-            "Maximize",
+            "X",
+            tooltip,
             "/buttons/window-maximize-normal.png",
             "/buttons/window-maximize-hover.png",
-            "/buttons/window-maximize-pressed.png"
+            "/buttons/window-maximize-pressed.png",
+            25
         );
         maximizeButton.addActionListener(e -> {
             JFrame frame = (JFrame) toolBar.getTopLevelAncestor();

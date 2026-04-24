@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 public class Display extends JPanel {
+
+    private JPanel display;
     private static final long serialVersionUID = 1L;
 
     // Border images
@@ -75,5 +77,9 @@ public class Display extends JPanel {
         addMouseListener(mouseController);
         addMouseMotionListener(mouseController);
     }
+
+    public JPanel getDisplay() {
+        return display;
+    }  
 
 } 
