@@ -26,28 +26,25 @@ public class ApplicationLauncher {
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
-        layeredPane.setOpaque(false);
-        layeredPane.setBackground(new Color(0,0,0,0));
         layeredPane.setPreferredSize(frame.getSize());
         frame.setContentPane(layeredPane);
-        layeredPane.add(display, JLayeredPane.PALETTE_LAYER);
 
         ToolBar toolbar = new ToolBar();
         MenuBar menuBar = new MenuBar();
+        CustomPanel customPanel = new CustomPanel();
         WindowMouseController mouseController = new WindowMouseController(display);
 
         display.attachWindowMouseController(mouseController);
         toolbar.attachWindowMouseController(mouseController);
         menuBar.attachWindowMouseController(mouseController);
-        layeredPane.add(menuBar.getMenuBar(), JLayeredPane.POPUP_LAYER-1);
-        layeredPane.add(toolbar.getToolBar(), JLayeredPane.POPUP_LAYER);
-        layeredPane.add(display.getDisplay(), JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(menuBar.getMenuBar(), JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(customPanel.getPanel(), JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(display, JLayeredPane.MODAL_LAYER);
+        layeredPane.add(toolbar.getToolBar(), JLayeredPane.DRAG_LAYER);
         //layeredPane.setLayer(frame.getContentPane(), JLayeredPane.POPUP_LAYER);
 
-        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar);
+        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar, customPanel);
         layoutManager.updateLayout();
-
-        frame.setBackground(Color.WHITE);
 
         Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(0, 0));
         Cursor clickCursor = CursorManager.createCustomCursor(cursorImages.click, new Point(0, 0));
@@ -64,7 +61,6 @@ public class ApplicationLauncher {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(windowWidth, windowHeight);
         frame.setUndecorated(true);
-        frame.setBackground(new Color(0, 0, 0, 0));
         frame.setLocationRelativeTo(null);
         return frame;
     }

@@ -13,34 +13,40 @@ import javax.swing.JButton;
 
 public class ButtonControl {
 
-    public JButton createControlButton(String fallbackText, String tooltip, String regularIconPath, String hoverIconPath, String pressedIconPath, int ctrlButtonSize) {
-
+    public JButton createControlButton(
+            String fallbackText,
+            String tooltip,
+            String regularIconPath,
+            String hoverIconPath,
+            String pressedIconPath,
+            int controlSize
+    ) {
         JButton button = new JButton(fallbackText);
 
-        ImageIcon regularIcon = loadScaledIcon(regularIconPath, ctrlButtonSize, ctrlButtonSize);
-        ImageIcon hoverIcon = loadScaledIcon(hoverIconPath, ctrlButtonSize, ctrlButtonSize);
-        ImageIcon pressedIcon = loadScaledIcon(pressedIconPath, ctrlButtonSize, ctrlButtonSize);
+        ImageIcon regularIcon = loadScaledIcon(regularIconPath, controlSize, controlSize);
+        ImageIcon hoverIcon = loadScaledIcon(hoverIconPath, controlSize, controlSize);
+        ImageIcon pressedIcon = loadScaledIcon(pressedIconPath, controlSize, controlSize);
 
         if (regularIcon != null) {
             button.setText("");
             button.setIcon(regularIcon);
         }
+
         if (hoverIcon != null) {
             button.setRolloverIcon(hoverIcon);
         }
+
         if (pressedIcon != null) {
             button.setPressedIcon(pressedIcon);
         }
 
-        styleControlButton(button, tooltip, ctrlButtonSize);
-
-        // Let Swing manage state changes
+        styleControlButton(button, tooltip, new Dimension(controlSize, controlSize));
         button.setRolloverEnabled(true);
 
         return button;
     }
 
-    public void styleControlButton(JButton button, String tooltip, int ctrlButtonSize) {
+    public void styleControlButton(JButton button, String tooltip, Dimension controlSize) {
         button.setFocusable(false);
         button.setFocusPainted(false);
         button.setOpaque(false);
@@ -49,16 +55,14 @@ public class ButtonControl {
         button.setForeground(Color.WHITE);
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setAlignmentY(Component.CENTER_ALIGNMENT);
+        button.setRolloverEnabled(true);
 
-        // helps rollover/pressed state behave more predictably
         button.setBorder(BorderFactory.createEmptyBorder());
 
-        Dimension controlSize = new Dimension(ctrlButtonSize, ctrlButtonSize);
         button.setPreferredSize(controlSize);
         button.setMinimumSize(controlSize);
         button.setMaximumSize(controlSize);
         button.setToolTipText(tooltip);
-
     }
 
     public ImageIcon loadScaledIcon(String resourcePath, int width, int height) {
@@ -72,5 +76,29 @@ public class ButtonControl {
         ImageIcon icon = new ImageIcon(resource);
         Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);
+    }
+
+    public void rescaleButtonIcons(
+            JButton button,
+            String regularPath,
+            String hoverPath,
+            String pressedPath,
+            int size
+    ) {
+        ImageIcon regular = loadScaledIcon(regularPath, size, size);
+        ImageIcon hover = loadScaledIcon(hoverPath, size, size);
+        ImageIcon pressed = loadScaledIcon(pressedPath, size, size);
+
+        if (regular != null) {
+            button.setIcon(regular);
+        }
+
+        if (hover != null) {
+            button.setRolloverIcon(hover);
+        }
+
+        if (pressed != null) {
+            button.setPressedIcon(pressed);
+        }
     }
 }

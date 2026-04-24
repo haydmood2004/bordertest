@@ -146,7 +146,7 @@ public class ToolBar {
             JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
             if (frame != null) {
                 frame.setExtendedState(frame.getExtendedState() | Frame.ICONIFIED);
-                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(0, 0, 0, 0)));
+                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(216, 240, 241)));
             }
         });
 
@@ -171,7 +171,7 @@ public class ToolBar {
                 } else {
                     frame.setExtendedState(state | Frame.MAXIMIZED_BOTH);
                 }
-                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(0, 0, 0, 0)));
+                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(216,240,241)));
             }
         });
         return maximizeButton;

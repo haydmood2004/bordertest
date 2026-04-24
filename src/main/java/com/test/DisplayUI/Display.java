@@ -78,8 +78,9 @@ public class Display extends JPanel {
         addMouseMotionListener(mouseController);
     }
 
-    public JPanel getDisplay() {
-        return display;
-    }  
+    @Override
+    public boolean contains(int x, int y) {
+        return false;
+    }
 
 } 

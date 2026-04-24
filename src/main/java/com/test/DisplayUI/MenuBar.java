@@ -11,7 +11,10 @@ import java.awt.*;
 public class MenuBar {
     private JPanel menuBar = new JPanel();
     private ButtonControl b = new ButtonControl();
-
+    private final String REG = "/buttons/default button reg.png";
+    private final String HOVER = "/buttons/default button hover.png";
+    private final String PRESS = "/buttons/default button click.png";
+    private int lastIconSize = -1;
     private JButton bodyButton;
     private JButton faceButton;
     private JButton hairButton;
@@ -29,10 +32,8 @@ public class MenuBar {
 
     private void setupMenuBar() {
         menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.Y_AXIS));
-        menuBar.setBackground(new Color(98, 3, 49));
+        menuBar.setBackground(new Color(245, 175, 201));
         menuBar.setOpaque(true);
-
-        // padding from edges (important!)
         menuBar.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 7));
     }
 
@@ -41,10 +42,9 @@ public class MenuBar {
             return;
         }
 
-        button.setAlignmentY(Component.CENTER_ALIGNMENT);
-        int glueIndex = menuBar.getComponentZOrder(Box.createVerticalGlue());
-        int insertIndex = (glueIndex >= 0) ? glueIndex : menuBar.getComponentCount();
-        menuBar.add(button, insertIndex);
+        button.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        menuBar.add(button);
+
         menuBar.revalidate();
         menuBar.repaint();
     }
@@ -132,6 +132,40 @@ public class MenuBar {
         for (Component component : menuBar.getComponents()) {
             component.setCursor(cursor);
         }
+    }
+
+    public void resizeButtons(int size) {
+        JButton[] buttons = {
+            bodyButton,
+            faceButton,
+            hairButton,
+            topButton,
+            bottomButton,
+            fullDressButton,
+            shoeButton,
+            accessoryButton
+        };
+
+        if (size == lastIconSize) {
+            return;
+        }
+
+        lastIconSize = size;
+
+        Dimension dim = new Dimension(size, size);
+
+        for (JButton button : buttons) {
+            if (button != null) {
+                button.setPreferredSize(dim);
+                button.setMinimumSize(dim);
+                button.setMaximumSize(dim);
+
+                b.rescaleButtonIcons(button, REG, HOVER, PRESS, size);
+            }
+        }
+
+        menuBar.revalidate();
+        menuBar.repaint();
     }
 
     public JPanel getMenuBar() {
