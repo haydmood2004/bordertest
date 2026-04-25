@@ -9,7 +9,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+
+import com.test.DisplayUI.Panels.CustomPanel;
 
 public class FrameLayoutManager {
     private static final int topBorderHeight = 80;
@@ -87,7 +90,8 @@ public class FrameLayoutManager {
         }
 
         customPanel.getPanel().setPreferredSize(new Dimension(frameWidth/4, frameHeight));
-        customPanel.getPanel().setBounds(60, 0, frameWidth/4, frameHeight);
+        customPanel.getPanel().setBounds(menuWidth, 0, frameWidth/4, frameHeight);
+        customPanel.updateLayout();
 
         roundFrameShape();
         layeredPane.revalidate();

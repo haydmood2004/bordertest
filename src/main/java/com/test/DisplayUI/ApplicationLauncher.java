@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
+import com.test.DisplayUI.Panels.CustomPanel;
+
 public class ApplicationLauncher {
     private static final int windowWidth = 720;
     private static final int windowHeight = 480;
@@ -46,8 +48,15 @@ public class ApplicationLauncher {
         FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar, customPanel);
         layoutManager.updateLayout();
 
-        Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(0, 0));
-        Cursor clickCursor = CursorManager.createCustomCursor(cursorImages.click, new Point(0, 0));
+        Cursor defaultCursor = CursorManager.createCustomCursor(
+            cursorImages.regular,
+            new Point(4, 2)
+        );
+
+        Cursor clickCursor = CursorManager.createCustomCursor(
+            cursorImages.click,
+            new Point(4, 2)
+        );
 
         applyCursorsToAllComponents(frame, layeredPane, display, toolbar, defaultCursor, menuBar);
         mouseController.setCursors(defaultCursor, clickCursor);
