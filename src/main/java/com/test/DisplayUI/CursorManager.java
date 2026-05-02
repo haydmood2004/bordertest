@@ -9,7 +9,9 @@ import java.awt.image.BufferedImage;
 
 public class CursorManager {
     private static final Toolkit toolkit = Toolkit.getDefaultToolkit();
-    private static final int cursorSize = 32;
+    private static final int cursor_size = 32;
+
+    private CursorManager() {}
 
     public static Cursor createCustomCursor(BufferedImage cursorImage, Point hotspot) {
         if (cursorImage == null) {
@@ -17,13 +19,14 @@ public class CursorManager {
         }
 
         try {
-            Image scaledImage = cursorImage.getScaledInstance(cursorSize, cursorSize, Image.SCALE_SMOOTH);
-            BufferedImage scaledCursor = new BufferedImage(cursorSize, cursorSize, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = scaledCursor.createGraphics();
-            g2d.drawImage(scaledImage, 0, 0, null);
-            g2d.dispose();
-            
-            return toolkit.createCustomCursor(scaledCursor, hotspot, "custom");
+            Image scaledImage = cursorImage.getScaledInstance(cursor_size, cursor_size, Image.SCALE_SMOOTH);
+            BufferedImage scaledCursor = new BufferedImage(cursor_size, cursor_size, BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2 = scaledCursor.createGraphics();
+            g2.drawImage(scaledImage, 0, 0, null);
+            g2.dispose();
+
+            return toolkit.createCustomCursor(scaledCursor, hotspot, "custom-cursor");
         } catch (Exception e) {
             System.err.println("Failed to create custom cursor: " + e.getMessage());
             return Cursor.getDefaultCursor();

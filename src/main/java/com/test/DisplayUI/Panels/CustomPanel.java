@@ -1,121 +1,277 @@
 package com.test.DisplayUI.Panels;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
+import java.awt.*;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import com.test.DisplayUI.ColorController;
-import com.test.DisplayUI.Sliders.BrightnessSlider;
-import com.test.DisplayUI.Sliders.HueSlider;
-import com.test.DisplayUI.Sliders.SaturationSlider;
+import com.test.DisplayUI.UITheme;
+import com.test.DisplayUI.Sliders.*;
 
 public class CustomPanel {
-    private JPanel panel = new JPanel();
+    private static final int slider_count = 4;
 
-    private HueSlider hueSlider = new HueSlider();
-    private SaturationSlider saturationSlider = new SaturationSlider();
-    private ColorController colorController = new ColorController();
-    private BrightnessSlider brightnessSlider = new BrightnessSlider();
-    private Font labelFont = new Font("OCR A Extended", Font.BOLD, 13);
-    private JLabel hueLabel = new JLabel("H");
-    private JLabel satLabel = new JLabel("S");
-    private JLabel brightLabel = new JLabel("B");
-    private JLabel title = new JLabel("Custom Panel");
+    private final RoundedPanel panel = new RoundedPanel();
 
+    private final HueSlider hueSlider = new HueSlider();
+    private final SaturationSlider saturationSlider = new SaturationSlider();
+    private final BrightnessSlider brightnessSlider = new BrightnessSlider();
+    private final SaturationSlider extraSlider = new SaturationSlider();
+
+    private final ColorController colorController = new ColorController();
+
+    private final JLabel title = new JLabel("Customize");
+    private final JLabel hueLabel = new JLabel("Hue");
+    private final JLabel satLabel = new JLabel("Saturation");
+    private final JLabel brightLabel = new JLabel("Brightness");
+    private final JLabel extraLabel = new JLabel("Extra");
+
+    private final JLabel previewLabel = new JLabel("Preview");
+    private final RoundedPreview previewBox = new RoundedPreview();
+
+    private Color selectedColor = Color.BLUE;
+
+    private Consumer<Color> colorListener;
+    private IntConsumer optionListener;
 
     public CustomPanel() {
-        setupPanel();
+        setup();
+        connect();
+
+        showCategory("Body", "Body Type", 4, color -> {}, index -> {});
     }
 
-    public void updateLayout() {
+    private void setup() {
+        panel.setLayout(null);
+        panel.setOpaque(false);
+        panel.setPanelColor(UITheme.panel_bg);
 
-        int w = panel.getWidth();
-        int h = panel.getHeight();
+        style(title, 18);
+        style(hueLabel, 12);
+        style(satLabel, 12);
+        style(brightLabel, 12);
+        style(extraLabel, 12);
+        style(previewLabel, 12);
 
-        int labelX = (int)(w * 0.05);
-        int labelWidth = (int)(w * 0.20);
-        int sliderX = labelX + 20;
+        panel.add(title);
 
-        int sliderWidth = w - sliderX - 20;
-        int sliderHeight = Math.max(30, (int)(h * 0.08));
+        panel.add(hueLabel);
+        panel.add(satLabel);
+        panel.add(brightLabel);
+        panel.add(extraLabel);
 
-        int hueY = (int)(h * 0.20)-(title.getHeight()-10);
-        int satY = (int)(h * 0.26)-(title.getHeight()-10);
-        int brightY = (int)(h * 0.32)-(title.getHeight()-10);
-        int titleY = 40;
+        panel.add(hueSlider);
+        panel.add(saturationSlider);
+        panel.add(brightnessSlider);
+        panel.add(extraSlider);
 
-        int labelHeight = Math.max(18, (int)(h * 0.05));
-        int titleHeight = Math.max(30, (int)(h * 0.08));
+        panel.add(previewLabel);
+        panel.add(previewBox);
+    }
 
-        hueSlider.setBounds(sliderX, hueY, sliderWidth, sliderHeight);
-        saturationSlider.setBounds(sliderX, satY, sliderWidth, sliderHeight);
-        brightnessSlider.setBounds(sliderX, brightY, sliderWidth, sliderHeight);
+    private void connect() {
+        hueSlider.connectTo(colorController);
+        saturationSlider.connectTo(colorController);
+        brightnessSlider.connectTo(colorController);
 
-        Font scaledFont = labelFont.deriveFont(scaleFont(h, 0.025f, 12f, 22f));
-        Font titleFont = labelFont.deriveFont(Font.BOLD, scaleFont(h, 0.04f, 18f, 36f));
-        hueLabel.setFont(scaledFont);
-        satLabel.setFont(scaledFont);
-        brightLabel.setFont(scaledFont);
-        title.setFont(titleFont);
+        extraSlider.addChangeListener(e -> {
+            if (optionListener != null) {
+                optionListener.accept(extraSlider.getValue());
+            }
+        });
 
-        title.setBounds(0, titleY, w, titleHeight);
-        hueLabel.setBounds(labelX, hueY + (sliderHeight - labelHeight) / 2, labelWidth, labelHeight);
-        satLabel.setBounds(labelX, satY + (sliderHeight - labelHeight) / 2, labelWidth, labelHeight);
-        brightLabel.setBounds(labelX, brightY + (sliderHeight - labelHeight) / 2, labelWidth, labelHeight);
+        colorController.setColorListener(color -> {
+            selectedColor = color;
+            previewBox.setColor(selectedColor);
+
+            if (colorListener != null) {
+                colorListener.accept(selectedColor);
+            }
+        });
+    }
+
+    public void showCategory(
+            String titleText,
+            String extraText,
+            int optionCount,
+            Consumer<Color> colorListener,
+            IntConsumer optionListener
+    ) {
+        title.setText(titleText);
+        extraLabel.setText(extraText);
+
+        this.colorListener = colorListener;
+        this.optionListener = optionListener;
+
+        int safeOptionCount = Math.max(1, optionCount);
+
+        extraSlider.setMinimum(0);
+        extraSlider.setMaximum(safeOptionCount - 1);
+        extraSlider.setValue(0);
 
         panel.revalidate();
         panel.repaint();
     }
 
-    private float scaleFont(int h, float percent, float min, float max) {
-        float size = h * percent;
-        return Math.max(min, Math.min(size, max));
+    public void updateLayout() {
+        int w = panel.getWidth();
+        int h = panel.getHeight();
+
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+
+        int padding = clamp(w / 8, 20, 40);
+        int contentWidth = Math.max(1, w - padding * 2);
+
+        int titleHeight = clamp(h / 10, 24, 34);
+        int labelHeight = clamp(h / 34, 14, 20);
+
+        int previewBoxHeight = clamp(h / 12, 28, 46);
+        int previewGap = 6;
+
+        title.setBounds(padding, padding, contentWidth, titleHeight);
+
+        int y = padding + titleHeight + 10;
+
+        int reservedPreviewSpace =
+                labelHeight + 4 + previewBoxHeight + previewGap + padding;
+
+        int available = h - y - reservedPreviewSpace;
+
+        int rowHeight = clamp(available / slider_count, 46, 64);
+        int sliderHeight = clamp((int) Math.round(rowHeight * 0.40), 20, 30);
+
+        JLabel[] labels = {
+                hueLabel,
+                satLabel,
+                brightLabel,
+                extraLabel
+        };
+
+        JComponent[] sliders = {
+                hueSlider,
+                saturationSlider,
+                brightnessSlider,
+                extraSlider
+        };
+
+        for (int i = 0; i < slider_count; i++) {
+            labels[i].setBounds(padding, y, contentWidth, labelHeight);
+
+            sliders[i].setBounds(
+                    padding,
+                    y + labelHeight + 4,
+                    contentWidth,
+                    sliderHeight
+            );
+
+            y += rowHeight;
+        }
+
+        y += previewGap;
+
+        previewLabel.setBounds(padding, y, contentWidth, labelHeight);
+        y += labelHeight + 4;
+
+        previewBox.setBounds(padding, y, contentWidth, previewBoxHeight);
+
+        int thumb = clamp(w / 16, 12, 18);
+        int track = clamp(w / 40, 5, 9);
+
+        resize(hueSlider, track, thumb);
+        resize(saturationSlider, track, thumb);
+        resize(brightnessSlider, track, thumb);
+        resize(extraSlider, track, thumb);
     }
 
-    private void styleLabel(JLabel label) {
+    private void resize(JSlider slider, int track, int thumb) {
+        if (slider.getUI() instanceof CustomSliderUI ui) {
+            ui.setSizes(track, thumb);
+        }
+    }
+
+    private void style(JLabel label, int size) {
         label.setForeground(Color.WHITE);
-        label.setOpaque(false);
-        label.setFont(labelFont);
+        label.setFont(new Font("OCR A Extended", Font.BOLD, size));
+        label.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
-    public void setupPanel() {
-        panel.setLayout(null);
-        panel.setBackground(new Color(250, 216, 229));
-        panel.setOpaque(true);
-
-        styleLabel(hueLabel);
-        styleLabel(satLabel);
-        styleLabel(brightLabel);
-        styleLabel(title);
-        title.setHorizontalAlignment(JLabel.CENTER);
-
-        panel.add(hueLabel);
-        panel.add(satLabel);
-        panel.add(brightLabel);
-        panel.add(title);
-
-        panel.add(hueSlider);
-        panel.add(saturationSlider);
-        panel.add(brightnessSlider);
-
-        hueSlider.connectTo(colorController);
-        saturationSlider.connectTo(colorController);
-        brightnessSlider.connectTo(colorController);
-
-        colorController.setColorListener(color -> {
-            panel.setBackground(color);
-        });
-
-        colorController.setHue(hueSlider.getValue() / 3600f);
-        colorController.setSaturation(saturationSlider.getValue() / 1000f);
-        colorController.setBrightness(brightnessSlider.getValue() / 1000f);
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     public JPanel getPanel() {
         return panel;
+    }
+
+    private class RoundedPanel extends JPanel {
+        private Color bg = UITheme.panel_bg;
+
+        public void setPanelColor(Color color) {
+            bg = color;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            g2.setColor(bg);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+
+            g2.setColor(new Color(255, 255, 255, 80));
+            g2.setStroke(new BasicStroke(2f));
+            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 25, 25);
+
+            g2.dispose();
+        }
+    }
+
+    private class RoundedPreview extends JPanel {
+        private Color color = selectedColor;
+
+        public RoundedPreview() {
+            setOpaque(false);
+        }
+
+        public void setColor(Color color) {
+            this.color = color;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            g2.setColor(new Color(255, 255, 255, 110));
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+
+            int inset = 6;
+
+            g2.setColor(color);
+            g2.fillRoundRect(
+                    inset,
+                    inset,
+                    getWidth() - inset * 2,
+                    getHeight() - inset * 2,
+                    14,
+                    14
+            );
+
+            g2.dispose();
+        }
     }
 }

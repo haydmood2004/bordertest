@@ -13,7 +13,6 @@ public class ApplicationLauncher {
     private static final int windowWidth = 720;
     private static final int windowHeight = 480;
     private static final String windowTitle = "Graphics Practice";
-    private static final int menuBarWidth = 60;
 
     public static void main(String[] args) throws IOException {
         JFrame frame = createFrame();
@@ -23,6 +22,7 @@ public class ApplicationLauncher {
 
         ResourceManager.BorderImages borderImages = ResourceManager.loadBorderImages();
         ResourceManager.CursorImages cursorImages = ResourceManager.loadCursorImages();
+
         display.setBorderImages(borderImages);
         display.setOpaque(false);
 
@@ -32,31 +32,26 @@ public class ApplicationLauncher {
         frame.setContentPane(layeredPane);
 
         ToolBar toolbar = new ToolBar();
-        MenuBar menuBar = new MenuBar();
         CustomPanel customPanel = new CustomPanel();
+        MenuBar menuBar = new MenuBar(customPanel);
+
         WindowMouseController mouseController = new WindowMouseController(display);
 
         display.attachWindowMouseController(mouseController);
         toolbar.attachWindowMouseController(mouseController);
         menuBar.attachWindowMouseController(mouseController);
+
         layeredPane.add(menuBar.getMenuBar(), JLayeredPane.PALETTE_LAYER);
         layeredPane.add(customPanel.getPanel(), JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(display, JLayeredPane.MODAL_LAYER);
         layeredPane.add(toolbar.getToolBar(), JLayeredPane.DRAG_LAYER);
-        //layeredPane.setLayer(frame.getContentPane(), JLayeredPane.POPUP_LAYER);
 
-        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar, customPanel);
+        FrameLayoutManager layoutManager =
+                new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar, customPanel);
         layoutManager.updateLayout();
 
-        Cursor defaultCursor = CursorManager.createCustomCursor(
-            cursorImages.regular,
-            new Point(4, 2)
-        );
-
-        Cursor clickCursor = CursorManager.createCustomCursor(
-            cursorImages.click,
-            new Point(4, 2)
-        );
+        Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(4, 2));
+        Cursor clickCursor = CursorManager.createCustomCursor(cursorImages.click, new Point(4, 2));
 
         applyCursorsToAllComponents(frame, layeredPane, display, toolbar, defaultCursor, menuBar);
         mouseController.setCursors(defaultCursor, clickCursor);
@@ -75,13 +70,19 @@ public class ApplicationLauncher {
     }
 
     private static void initializeDisplay(Display display) {
-        display.setBackground(new Color(0, 0,0,0));
+        display.setBackground(new Color(0, 0, 0, 0));
         display.setSize(windowWidth, windowHeight);
         display.setPreferredSize(display.getSize());
     }
 
-    private static void applyCursorsToAllComponents(JFrame frame, JLayeredPane layeredPane, 
-                                                     Display display, ToolBar toolbar, Cursor cursor, MenuBar menuBar) {
+    private static void applyCursorsToAllComponents(
+            JFrame frame,
+            JLayeredPane layeredPane,
+            Display display,
+            ToolBar toolbar,
+            Cursor cursor,
+            MenuBar menuBar
+    ) {
         frame.setCursor(cursor);
         layeredPane.setCursor(cursor);
         display.setCursor(cursor);

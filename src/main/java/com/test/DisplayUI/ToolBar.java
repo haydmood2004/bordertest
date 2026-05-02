@@ -4,16 +4,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Image;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.net.URL;
-import java.util.Objects;
 
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,32 +16,73 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 public class ToolBar {
-    private ButtonControl b = new ButtonControl();
-    private static final String defaultTitle = "Character Generator";
+    private static final String default_title = "Character Generator";
+    private static final int window_button_size = 25;
 
+    private final ButtonControl buttonControl = new ButtonControl();
     private final JToolBar toolBar;
     private final Component rightSideGlue;
     private final JLabel titleLabel;
 
     public ToolBar() {
-        this(defaultTitle);
+        this(default_title);
     }
 
     public ToolBar(String title, JButton... instanceButtons) {
         toolBar = createToolBarBase();
         titleLabel = createTitleLabel(title);
+
+        toolBar.add(Box.createHorizontalStrut(UITheme.space_lg));
         toolBar.add(titleLabel);
+
         rightSideGlue = Box.createHorizontalGlue();
         toolBar.add(rightSideGlue);
 
         addInstanceButtons(instanceButtons);
+        addWindowControls();
+    }
 
-        toolBar.add(createMinimizeButton("Minimize"));
-        toolBar.addSeparator(new Dimension(5,0));
-        toolBar.add(createMaximizeButton("Maximize"));
-        toolBar.addSeparator(new Dimension(5, 0));
-        toolBar.add(createCloseButton("Close"));
-        toolBar.addSeparator(new Dimension(10,0));
+    private JToolBar createToolBarBase() {
+        JToolBar bar = new JToolBar();
+        bar.setOrientation(JToolBar.HORIZONTAL);
+        bar.setFloatable(false);
+        bar.setRollover(true);
+        bar.setBorderPainted(false);
+        bar.setOpaque(false);
+        bar.setMargin(new Insets(0, 0, 0, 0));
+        bar.setAlignmentY(Component.CENTER_ALIGNMENT);
+        return bar;
+    }
+
+    private JLabel createTitleLabel(String title) {
+        JLabel label = new JLabel(title == null ? default_title : title);
+        label.setForeground(UITheme.text_light);
+        label.setFont(UITheme.display_font.deriveFont(Font.BOLD, 12f));
+        label.setAlignmentY(Component.CENTER_ALIGNMENT);
+        return label;
+    }
+
+    private void addWindowControls() {
+        toolBar.add(createMinimizeButton());
+        addButtonGap(5);
+        toolBar.add(createMaximizeButton());
+        addButtonGap(5);
+        toolBar.add(createCloseButton());
+        addButtonGap(10);
+    }
+
+    private void addButtonGap(int width) {
+        toolBar.add(Box.createRigidArea(new Dimension(width, 0)));
+    }
+
+    public void addInstanceButtons(JButton... buttons) {
+        if (buttons == null) {
+            return;
+        }
+
+        for (JButton button : buttons) {
+            addInstanceButton(button);
+        }
     }
 
     public void addInstanceButton(JButton button) {
@@ -55,15 +91,77 @@ public class ToolBar {
         }
 
         button.setAlignmentY(Component.CENTER_ALIGNMENT);
+
         int glueIndex = toolBar.getComponentZOrder(rightSideGlue);
-        int insertIndex = (glueIndex >= 0) ? glueIndex : toolBar.getComponentCount();
+        int insertIndex = glueIndex >= 0 ? glueIndex : toolBar.getComponentCount();
+
         toolBar.add(button, insertIndex);
         toolBar.revalidate();
         toolBar.repaint();
     }
 
-    public JToolBar getToolBar() {
-        return toolBar;
+    private JButton createCloseButton() {
+        JButton button = createWindowButton(
+                "Close",
+                "/buttons/window-close-normal.png",
+                "/buttons/window-close-hover.png",
+                "/buttons/window-close-pressed.png"
+        );
+        button.addActionListener(e -> System.exit(0));
+        return button;
+    }
+
+    private JButton createMinimizeButton() {
+        JButton button = createWindowButton(
+                "Minimize",
+                "/buttons/window-minimize-normal.png",
+                "/buttons/window-minimize-hover.png",
+                "/buttons/window-minimize-pressed.png"
+        );
+        button.addActionListener(e -> {
+            JFrame frame = getFrame();
+            if (frame != null) {
+                frame.setExtendedState(frame.getExtendedState() | Frame.ICONIFIED);
+                SwingUtilities.invokeLater(() -> frame.setBackground(UITheme.window_bg));
+            }
+        });
+        return button;
+    }
+
+    private JButton createMaximizeButton() {
+        JButton button = createWindowButton(
+                "Maximize",
+                "/buttons/window-maximize-normal.png",
+                "/buttons/window-maximize-hover.png",
+                "/buttons/window-maximize-pressed.png"
+        );
+        button.addActionListener(e -> {
+            JFrame frame = getFrame();
+            if (frame == null) {
+                return;
+            }
+
+            int state = frame.getExtendedState();
+            boolean maximized = (state & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+
+            frame.setExtendedState(maximized ? Frame.NORMAL : state | Frame.MAXIMIZED_BOTH);
+            SwingUtilities.invokeLater(() -> frame.setBackground(UITheme.window_bg));
+        });
+        return button;
+    }
+
+    private JButton createWindowButton(String tooltip, String normal, String hover, String pressed) {
+        return buttonControl.createControlButton(
+            "", 
+            tooltip, 
+            normal, 
+            hover, 
+            pressed, 
+            window_button_size);
+    }
+
+    private JFrame getFrame() {
+        return (JFrame) toolBar.getTopLevelAncestor();
     }
 
     public void attachWindowMouseController(WindowMouseController mouseController) {
@@ -73,107 +171,21 @@ public class ToolBar {
         titleLabel.addMouseMotionListener(mouseController);
 
         for (Component component : toolBar.getComponents()) {
-            if (component instanceof JButton) {
-                component.addMouseListener(mouseController);
-                component.addMouseMotionListener(mouseController);
-            }
+            component.addMouseListener(mouseController);
+            component.addMouseMotionListener(mouseController);
         }
     }
 
     public void setCursorForAllComponents(Cursor cursor) {
         toolBar.setCursor(cursor);
         titleLabel.setCursor(cursor);
+
         for (Component component : toolBar.getComponents()) {
             component.setCursor(cursor);
         }
     }
 
-    public JToolBar createToolBarBase() {
-        JToolBar bar = new JToolBar();
-        bar.setOrientation(JToolBar.HORIZONTAL);
-        bar.setFloatable(false);
-        bar.setRollover(true);
-        bar.setBorderPainted(false);
-        bar.setOpaque(false);
-        bar.setAlignmentY(Component.CENTER_ALIGNMENT);
-        bar.setMargin(new Insets(0, 0, 0, 0));
-        bar.setAlignmentX(JToolBar.CENTER);
-        bar.setVisible(true);
-        return bar;
-    }
-
-    private JLabel createTitleLabel(String title) {
-        JLabel titleLabel = new JLabel(Objects.requireNonNullElse(title, defaultTitle));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setHorizontalAlignment(JLabel.LEFT);
-        titleLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        titleLabel.setFont(new java.awt.Font("OCR A Extended", java.awt.Font.BOLD, 12));
-        return titleLabel;
-    }
-
-    public void addInstanceButtons(JButton... buttons) {
-        if (buttons == null) {
-            return;
-        }
-        for (JButton button : buttons) {
-            addInstanceButton(button);
-        }
-    }
-
-    private JButton createCloseButton(String tooltip) {
-        JButton closeButton = b.createControlButton(
-            "X",
-            tooltip,
-            "/buttons/window-close-normal.png",
-            "/buttons/window-close-hover.png",
-            "/buttons/window-close-pressed.png",
-            25
-        );
-        closeButton.addActionListener(e -> System.exit(0));
-        return closeButton;
-    }
-
-    private JButton createMinimizeButton(String tooltip) {
-        JButton minimizeButton = b.createControlButton(
-            "X",
-            tooltip,
-            "/buttons/window-minimize-normal.png",
-            "/buttons/window-minimize-hover.png",
-            "/buttons/window-minimize-pressed.png",
-            25
-        );
-        minimizeButton.addActionListener(e -> {
-            JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
-            if (frame != null) {
-                frame.setExtendedState(frame.getExtendedState() | Frame.ICONIFIED);
-                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(216, 240, 241)));
-            }
-        });
-
-        return minimizeButton;
-    }
-
-    private JButton createMaximizeButton(String tooltip) {
-        JButton maximizeButton = b.createControlButton(
-            "X",
-            tooltip,
-            "/buttons/window-maximize-normal.png",
-            "/buttons/window-maximize-hover.png",
-            "/buttons/window-maximize-pressed.png",
-            25
-        );
-        maximizeButton.addActionListener(e -> {
-            JFrame frame = (JFrame) toolBar.getTopLevelAncestor();
-            if (frame != null) {
-                int state = frame.getExtendedState();
-                if ((state & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH) {
-                    frame.setExtendedState(Frame.NORMAL);
-                } else {
-                    frame.setExtendedState(state | Frame.MAXIMIZED_BOTH);
-                }
-                SwingUtilities.invokeLater(() -> frame.setBackground(new Color(216,240,241)));
-            }
-        });
-        return maximizeButton;
+    public JToolBar getToolBar() {
+        return toolBar;
     }
 }
