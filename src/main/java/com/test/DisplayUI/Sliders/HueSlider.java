@@ -7,7 +7,7 @@ import com.test.DisplayUI.ColorController;
 public class HueSlider extends JSlider {
 
     public HueSlider() {
-        super(0, 3600, 0);
+        super(0, 360, 0);
 
         setUI(new CustomSliderUI(
                 this,
@@ -17,6 +17,10 @@ public class HueSlider extends JSlider {
     }
 
     public void connectTo(ColorController controller) {
-        addChangeListener(e -> controller.setHue(getValue() / 3600f));
+        addChangeListener(e -> {
+        if (!getValueIsAdjusting()) {
+            controller.setHue(getValue() / 360f);
+        }
+    });
     }
 }

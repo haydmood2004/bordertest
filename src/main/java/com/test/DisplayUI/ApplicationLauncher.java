@@ -18,6 +18,25 @@ public class ApplicationLauncher {
         JFrame frame = createFrame();
 
         Display display = new Display();
+
+        CharacterCanvas characterCanvas = new CharacterCanvas();
+        ResourceManager.MaleBodyImages maleImages = ResourceManager.loadMaleBodyImages();
+        ResourceManager.FaceImages faceImages = ResourceManager.loadFaceImages();
+        ResourceManager.ScoleraImages scoleraImages = ResourceManager.loadScoleraImages();
+        ResourceManager.IrisImages irisImages = ResourceManager.loadIrisImages();
+        ResourceManager.EyeImages eyeImages = ResourceManager.loadEyeImages();
+        ResourceManager.NoseImages noseImages = ResourceManager.loadNoseImages();
+        ResourceManager.MouthImages mouthImages = ResourceManager.loadMouthImages();
+        ResourceManager.EarImages earImages = ResourceManager.loadEarImages();
+        characterCanvas.setMaleBodyImages(maleImages.m1_c, maleImages.m1_l);
+        characterCanvas.setFace(faceImages.j1_c, faceImages.j1_l);
+        characterCanvas.setScolera(scoleraImages.s1);
+        characterCanvas.setIris(irisImages.i1_3_c, irisImages.i1_l);
+        characterCanvas.setEye(eyeImages.e1_c, eyeImages.e1_l);
+        characterCanvas.setNose(noseImages.n1);
+        characterCanvas.setMouth(mouthImages.l1);
+        characterCanvas.setEar(earImages.e1_c,earImages.e1_l);
+
         initializeDisplay(display);
 
         ResourceManager.BorderImages borderImages = ResourceManager.loadBorderImages();
@@ -33,21 +52,25 @@ public class ApplicationLauncher {
 
         ToolBar toolbar = new ToolBar();
         CustomPanel customPanel = new CustomPanel();
-        MenuBar menuBar = new MenuBar(customPanel);
+        MenuBar menuBar = new MenuBar(customPanel, characterCanvas, maleImages, faceImages, scoleraImages, irisImages, eyeImages, noseImages, mouthImages, earImages);
 
         WindowMouseController mouseController = new WindowMouseController(display);
+        customPanel.getColorController().setColorListener(color -> {
+            characterCanvas.setSkinTintColor(color);
+        });
 
         display.attachWindowMouseController(mouseController);
         toolbar.attachWindowMouseController(mouseController);
         menuBar.attachWindowMouseController(mouseController);
 
+        layeredPane.add(characterCanvas, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(customPanel.getPanel(), JLayeredPane.PALETTE_LAYER);
         layeredPane.add(menuBar.getMenuBar(), JLayeredPane.PALETTE_LAYER);
-        layeredPane.add(customPanel.getPanel(), JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(display, JLayeredPane.MODAL_LAYER);
         layeredPane.add(toolbar.getToolBar(), JLayeredPane.DRAG_LAYER);
 
-        FrameLayoutManager layoutManager =
-                new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar, customPanel);
+        FrameLayoutManager layoutManager = new FrameLayoutManager(frame, layeredPane, display, toolbar, menuBar,
+                customPanel, characterCanvas);
         layoutManager.updateLayout();
 
         Cursor defaultCursor = CursorManager.createCustomCursor(cursorImages.regular, new Point(4, 2));
@@ -81,8 +104,7 @@ public class ApplicationLauncher {
             Display display,
             ToolBar toolbar,
             Cursor cursor,
-            MenuBar menuBar
-    ) {
+            MenuBar menuBar) {
         frame.setCursor(cursor);
         layeredPane.setCursor(cursor);
         display.setCursor(cursor);

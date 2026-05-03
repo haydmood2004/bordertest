@@ -17,6 +17,10 @@ public class BrightnessSlider extends JSlider {
     }
 
     public void connectTo(ColorController controller) {
-        addChangeListener(e -> controller.setBrightness(getValue() / 1000f));
+        addChangeListener(e -> {
+        if (!getValueIsAdjusting()) {
+            controller.setBrightness(getValue() / 1000f);
+        }
+    });
     }
 }

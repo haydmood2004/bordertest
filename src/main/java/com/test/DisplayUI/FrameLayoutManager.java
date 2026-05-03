@@ -29,15 +29,17 @@ public class FrameLayoutManager {
     private final ToolBar toolbar;
     private final MenuBar menuBar;
     private final CustomPanel customPanel;
+    private final CharacterCanvas characterCanvas;
 
     public FrameLayoutManager(JFrame frame, JLayeredPane layeredPane, Display display, ToolBar toolbar,
-            MenuBar menuBar, CustomPanel customPanel) {
+            MenuBar menuBar, CustomPanel customPanel, CharacterCanvas characterCanvas) {
         this.frame = frame;
         this.layeredPane = layeredPane;
         this.display = display;
         this.toolbar = toolbar;
         this.menuBar = menuBar;
         this.customPanel = customPanel;
+        this.characterCanvas = characterCanvas;
         installListeners();
     }
 
@@ -66,6 +68,7 @@ public class FrameLayoutManager {
 
         layeredPane.setBounds(0, 0, frameWidth, frameHeight);
         display.setBounds(0, 0, frameWidth, frameHeight);
+        characterCanvas.setBounds(0, 0, frameWidth, frameHeight);
 
         layoutToolbar(frameWidth);
         layoutMenu(frameWidth, frameHeight);

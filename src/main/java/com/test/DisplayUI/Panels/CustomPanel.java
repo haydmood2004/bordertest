@@ -3,6 +3,7 @@ package com.test.DisplayUI.Panels;
 import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.Hashtable;
 
 import javax.swing.*;
 
@@ -18,21 +19,16 @@ public class CustomPanel {
     private final HueSlider hueSlider = new HueSlider();
     private final SaturationSlider saturationSlider = new SaturationSlider();
     private final BrightnessSlider brightnessSlider = new BrightnessSlider();
-    private final SaturationSlider extraSlider = new SaturationSlider();
-
+    private final JSlider extraSlider = new JSlider();
     private final ColorController colorController = new ColorController();
-
     private final JLabel title = new JLabel("Customize");
     private final JLabel hueLabel = new JLabel("Hue");
     private final JLabel satLabel = new JLabel("Saturation");
     private final JLabel brightLabel = new JLabel("Brightness");
     private final JLabel extraLabel = new JLabel("Extra");
-
     private final JLabel previewLabel = new JLabel("Preview");
     private final RoundedPreview previewBox = new RoundedPreview();
-
     private Color selectedColor = Color.BLUE;
-
     private Consumer<Color> colorListener;
     private IntConsumer optionListener;
 
@@ -40,7 +36,7 @@ public class CustomPanel {
         setup();
         connect();
 
-        showCategory("Body", "Body Type", 4, color -> {}, index -> {});
+        showCategory("Body", "Body Type", 7, color -> {}, index -> {});
     }
 
     private void setup() {
@@ -54,6 +50,31 @@ public class CustomPanel {
         style(brightLabel, 12);
         style(extraLabel, 12);
         style(previewLabel, 12);
+
+        extraSlider.setOpaque(false);
+        extraSlider.setPaintTicks(false);
+        extraSlider.setPaintLabels(false);
+        extraSlider.setSnapToTicks(true);
+        extraSlider.setMajorTickSpacing(1);
+        extraSlider.setMinorTickSpacing(1);
+        extraSlider.setUI(new CustomSliderUI(
+                extraSlider,
+                "/slider/regular slider track.png",
+                "/slider/thumb slider.png"
+        ));
+
+        extraSlider.setPaintLabels(true);
+
+        Hashtable<Integer, JLabel> labels = new Hashtable<>();
+
+        for (int i = 0; i < 7; i++) {
+            JLabel label = new JLabel(String.valueOf(i + 1));
+            label.setForeground(Color.WHITE);
+            label.setFont(new Font("OCR A Extended", Font.BOLD, 14));
+            labels.put(i, label);
+        }
+
+        extraSlider.setLabelTable(labels);
 
         panel.add(title);
 
@@ -72,12 +93,32 @@ public class CustomPanel {
     }
 
     private void connect() {
-        hueSlider.connectTo(colorController);
-        saturationSlider.connectTo(colorController);
-        brightnessSlider.connectTo(colorController);
+        hueSlider.addChangeListener(e -> {
+            updatePreviewOnly();
+
+            if (!hueSlider.getValueIsAdjusting()) {
+                applyCurrentColorToController();
+            }
+        });
+
+        saturationSlider.addChangeListener(e -> {
+            updatePreviewOnly();
+
+            if (!saturationSlider.getValueIsAdjusting()) {
+                applyCurrentColorToController();
+            }
+        });
+
+        brightnessSlider.addChangeListener(e -> {
+            updatePreviewOnly();
+
+            if (!brightnessSlider.getValueIsAdjusting()) {
+                applyCurrentColorToController();
+            }
+        });
 
         extraSlider.addChangeListener(e -> {
-            if (optionListener != null) {
+            if (!extraSlider.getValueIsAdjusting() && optionListener != null) {
                 optionListener.accept(extraSlider.getValue());
             }
         });
@@ -90,6 +131,44 @@ public class CustomPanel {
                 colorListener.accept(selectedColor);
             }
         });
+    }
+
+    private void applyCurrentColorToController() {
+        colorController.setHue(hueSlider.getValue() / 360f);
+        colorController.setSaturation(saturationSlider.getValue() / 1000f);
+        colorController.setBrightness(brightnessSlider.getValue() / 1000f);
+    }
+
+    private void updatePreviewOnly() {
+        float hue = hueSlider.getValue() / 360f;
+        float saturation = saturationSlider.getValue() / 1000f;
+        float brightness = brightnessSlider.getValue() / 1000f;
+
+        Color pureHueColor = Color.getHSBColor(hue, 1.0f, 1.0f);
+        Color gray = new Color(128, 128, 128);
+        Color saturatedColor = blend(gray, pureHueColor, saturation);
+
+        Color previewColor;
+
+        if (brightness < 0.5f) {
+            float amount = brightness / 0.5f;
+            previewColor = blend(Color.BLACK, saturatedColor, amount);
+        } else {
+            float amount = (brightness - 0.5f) / 0.5f;
+            previewColor = blend(saturatedColor, Color.WHITE, amount);
+        }
+
+        previewBox.setColor(previewColor);
+    }
+
+    private Color blend(Color a, Color b, float amount) {
+        float t = Math.max(0f, Math.min(1f, amount));
+
+        int r = Math.round(a.getRed() + (b.getRed() - a.getRed()) * t);
+        int g = Math.round(a.getGreen() + (b.getGreen() - a.getGreen()) * t);
+        int bl = Math.round(a.getBlue() + (b.getBlue() - a.getBlue()) * t);
+
+        return new Color(r, g, bl);
     }
 
     public void showCategory(
@@ -105,12 +184,16 @@ public class CustomPanel {
         this.colorListener = colorListener;
         this.optionListener = optionListener;
 
-        int safeOptionCount = Math.max(1, optionCount);
-
         extraSlider.setMinimum(0);
-        extraSlider.setMaximum(safeOptionCount - 1);
+        extraSlider.setMaximum(optionCount - 1);
         extraSlider.setValue(0);
 
+        if (optionListener != null) {
+            optionListener.accept(extraSlider.getValue());
+        }
+
+        updatePreviewOnly();
+        applyCurrentColorToController();
         panel.revalidate();
         panel.repaint();
     }
@@ -142,7 +225,7 @@ public class CustomPanel {
         int available = h - y - reservedPreviewSpace;
 
         int rowHeight = clamp(available / slider_count, 46, 64);
-        int sliderHeight = clamp((int) Math.round(rowHeight * 0.40), 20, 30);
+        int sliderHeight = clamp((int) Math.round(rowHeight * 0.65), 28, 42);
 
         JLabel[] labels = {
                 hueLabel,
@@ -205,6 +288,10 @@ public class CustomPanel {
 
     public JPanel getPanel() {
         return panel;
+    }
+
+    public ColorController getColorController() {
+        return colorController;
     }
 
     private class RoundedPanel extends JPanel {

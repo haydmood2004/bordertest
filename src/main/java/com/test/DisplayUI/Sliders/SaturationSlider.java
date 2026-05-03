@@ -17,6 +17,10 @@ public class SaturationSlider extends JSlider {
     }
 
     public void connectTo(ColorController controller) {
-        addChangeListener(e -> controller.setSaturation(getValue() / 1000f));
+        addChangeListener(e -> {
+        if (!getValueIsAdjusting()) {
+            controller.setSaturation(getValue() / 1000f);
+        }
+    });
     }
 }

@@ -3,6 +3,7 @@ package com.test.DisplayUI;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,13 +32,36 @@ public class MenuBar {
     private JButton fullDressButton;
     private JButton shoeButton;
     private JButton accessoryButton;
+    private final CharacterCanvas characterCanvas;
+    private final ResourceManager.MaleBodyImages maleImages;
+    private final ResourceManager.FaceImages faceImages;
+    private final ResourceManager.ScoleraImages scoleraImages;
+    private final ResourceManager.IrisImages irisImages;
+    private final ResourceManager.EyeImages eyeImages;
+    private final ResourceManager.NoseImages noseImages;
+    private final ResourceManager.MouthImages mouthImages;
+    private final ResourceManager.EarImages earImages;
 
-    public MenuBar(CustomPanel customPanel) {
+    public MenuBar(CustomPanel customPanel,
+                CharacterCanvas characterCanvas, ResourceManager.MaleBodyImages maleImages, ResourceManager.FaceImages faceImages, ResourceManager.ScoleraImages scoleraImages,
+                ResourceManager.IrisImages irisImages, ResourceManager.EyeImages eyeImages, ResourceManager.NoseImages noseImages, ResourceManager.MouthImages mouthImages,
+                ResourceManager.EarImages earImages) {
+
         this.customPanel = customPanel;
+        this.characterCanvas = characterCanvas;
+        this.maleImages = maleImages;
+        this.faceImages = faceImages;
+        this.scoleraImages = scoleraImages;
+        this.irisImages = irisImages;
+        this.eyeImages = eyeImages;
+        this.noseImages = noseImages;
+        this.mouthImages = mouthImages;
+        this.earImages = earImages;
 
         setupMenuBar();
         createButtons();
         addButtons();
+        bodyButton.doClick();
     }
 
     private void setupMenuBar() {
@@ -58,7 +82,45 @@ public class MenuBar {
         accessoryButton = createButton("Customize Accessories");
 
         bodyButton.addActionListener(e ->
-                customPanel.showCategory("Body", "Body Type", 4, color -> {}, index -> {})
+        customPanel.showCategory(
+            "Body",
+            "Body Type",
+            7,
+            color -> {},
+            index -> {
+                switch (index) {
+                    case 0 -> characterCanvas.setMaleBodyImages(maleImages.m1_c, maleImages.m1_l);
+                    case 1 -> characterCanvas.setMaleBodyImages(maleImages.m2_c, maleImages.m2_l);
+                    case 2 -> characterCanvas.setMaleBodyImages(maleImages.m3_c, maleImages.m3_l);
+                    case 3 -> characterCanvas.setMaleBodyImages(maleImages.m4_c, maleImages.m4_l);
+                    case 4 -> characterCanvas.setMaleBodyImages(maleImages.m5_c, maleImages.m5_l);
+                    case 5 -> characterCanvas.setMaleBodyImages(maleImages.m6_c, maleImages.m6_l);
+                    case 6 -> characterCanvas.setMaleBodyImages(maleImages.m7_c, maleImages.m7_l);
+                    default -> characterCanvas.setMaleBodyImages(maleImages.m1_c, maleImages.m1_l);
+                }
+            }
+        ));
+        customPanel.showCategory(      
+            "Face",
+            "Face Shape",
+            11,
+            color -> {},
+            index -> {
+                switch (index) {
+                    case 0 -> characterCanvas.setFace(faceImages.j1_c, faceImages.j1_l);
+                    case 1 -> characterCanvas.setFace(faceImages.j2_c, faceImages.j2_l);
+                    case 2 -> characterCanvas.setFace(faceImages.j3_c, faceImages.j3_l);
+                    case 3 -> characterCanvas.setFace(faceImages.j4_c, faceImages.j4_l);
+                    case 4 -> characterCanvas.setFace(faceImages.j5_c, faceImages.j5_l);
+                    case 5 -> characterCanvas.setFace(faceImages.j6_c, faceImages.j6_l);
+                    case 6 -> characterCanvas.setFace(faceImages.j7_c, faceImages.j7_l);
+                    case 7 -> characterCanvas.setFace(faceImages.j8_c, faceImages.j8_l);
+                    case 8 -> characterCanvas.setFace(faceImages.j9_c, faceImages.j9_l);
+                    case 9 -> characterCanvas.setFace(faceImages.j10_c, faceImages.j10_l);
+                    case 10 -> characterCanvas.setFace(faceImages.j11_c, faceImages.j11_l);
+                    default -> characterCanvas.setFace(faceImages.j1_c, faceImages.j1_l);
+                }
+            }
         );
 
         faceButton.addActionListener(e ->

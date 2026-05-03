@@ -13,7 +13,8 @@ import javax.swing.JButton;
 
 public class ButtonControl {
 
-    public JButton createControlButton(String fallbackText, String tooltip, String regularIconPath, String hoverIconPath,
+    public JButton createControlButton(String fallbackText, String tooltip, String regularIconPath,
+            String hoverIconPath,
             String pressedIconPath, int controlSize) {
         JButton button = new JButton(fallbackText == null ? "" : fallbackText);
 
@@ -45,8 +46,7 @@ public class ButtonControl {
         setIcons(button, regularPath, hoverPath, pressedPath, size);
     }
 
-    private void setIcons(JButton button, String regularPath, String hoverPath, String pressedPath, int size
-    ) {
+    private void setIcons(JButton button, String regularPath, String hoverPath, String pressedPath, int size) {
         ImageIcon regular = loadScaledIcon(regularPath, size, size);
         ImageIcon hover = loadScaledIcon(hoverPath, size, size);
         ImageIcon pressed = loadScaledIcon(pressedPath, size, size);

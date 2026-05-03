@@ -11,7 +11,8 @@ public class CursorManager {
     private static final Toolkit toolkit = Toolkit.getDefaultToolkit();
     private static final int cursor_size = 32;
 
-    private CursorManager() {}
+    private CursorManager() {
+    }
 
     public static Cursor createCustomCursor(BufferedImage cursorImage, Point hotspot) {
         if (cursorImage == null) {
