@@ -1,9 +1,9 @@
 package com.test.DisplayUI.Panels;
 
 import java.awt.*;
+import java.util.Hashtable;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.Hashtable;
 
 import javax.swing.*;
 
@@ -12,31 +12,60 @@ import com.test.DisplayUI.UITheme;
 import com.test.DisplayUI.Sliders.*;
 
 public class CustomPanel {
-    private static final int slider_count = 4;
+    private static final int SLIDER_COUNT = 9;
 
     private final RoundedPanel panel = new RoundedPanel();
 
     private final HueSlider hueSlider = new HueSlider();
     private final SaturationSlider saturationSlider = new SaturationSlider();
     private final BrightnessSlider brightnessSlider = new BrightnessSlider();
-    private final JSlider extraSlider = new JSlider();
+
+    private final JSlider bodySlider = createOptionSlider(7);
+    private final JSlider faceSlider = createOptionSlider(11);
+    private final JSlider earSlider = createOptionSlider(8);
+    private final JSlider noseSlider = createOptionSlider(5);
+    private final JSlider mouthSlider = createOptionSlider(8);
+    private final JSlider eyeSlider = createOptionSlider(8);
+
     private final ColorController colorController = new ColorController();
-    private final JLabel title = new JLabel("Customize");
+
+    private final JLabel title = new JLabel("Body");
+
     private final JLabel hueLabel = new JLabel("Hue");
     private final JLabel satLabel = new JLabel("Saturation");
     private final JLabel brightLabel = new JLabel("Brightness");
-    private final JLabel extraLabel = new JLabel("Extra");
+
+    private final JLabel bodyLabel = new JLabel("Body Type");
+    private final JLabel faceLabel = new JLabel("Face Type");
+    private final JLabel earLabel = new JLabel("Ear Type");
+    private final JLabel noseLabel = new JLabel("Nose Type");
+    private final JLabel mouthLabel = new JLabel("Mouth Type");
+    private final JLabel eyeLabel = new JLabel("Eye Type");
+
     private final JLabel previewLabel = new JLabel("Preview");
     private final RoundedPreview previewBox = new RoundedPreview();
-    private Color selectedColor = Color.BLUE;
-    private Consumer<Color> colorListener;
-    private IntConsumer optionListener;
+
+    private Color selectedColor = Color.WHITE;
+
+    private Consumer<Color> skinColorListener;
+
+    private IntConsumer bodyListener;
+    private IntConsumer faceListener;
+    private IntConsumer earListener;
+    private IntConsumer noseListener;
+    private IntConsumer mouthListener;
+    private IntConsumer eyeListener;
 
     public CustomPanel() {
         setup();
         connect();
 
-        showCategory("Body", "Body Type", 7, color -> {}, index -> {});
+        hueSlider.setValue(0);
+        saturationSlider.setValue(0);
+        brightnessSlider.setValue(1000);
+
+        updatePreviewOnly();
+        applyCurrentColorToController();
     }
 
     private void setup() {
@@ -44,52 +73,84 @@ public class CustomPanel {
         panel.setOpaque(false);
         panel.setPanelColor(UITheme.panel_bg);
 
-        style(title, 18);
-        style(hueLabel, 12);
-        style(satLabel, 12);
-        style(brightLabel, 12);
-        style(extraLabel, 12);
-        style(previewLabel, 12);
+        JLabel[] labels = {
+                title,
+                hueLabel,
+                satLabel,
+                brightLabel,
+                bodyLabel,
+                faceLabel,
+                earLabel,
+                noseLabel,
+                mouthLabel,
+                eyeLabel,
+                previewLabel
+        };
 
-        extraSlider.setOpaque(false);
-        extraSlider.setPaintTicks(false);
-        extraSlider.setPaintLabels(false);
-        extraSlider.setSnapToTicks(true);
-        extraSlider.setMajorTickSpacing(1);
-        extraSlider.setMinorTickSpacing(1);
-        extraSlider.setUI(new CustomSliderUI(
-                extraSlider,
+        for (JLabel label : labels) {
+            style(label, label == title ? 18 : 11);
+            panel.add(label);
+        }
+
+        JSlider[] sliders = getSliders();
+
+        for (JSlider slider : sliders) {
+            slider.setOpaque(false);
+            panel.add(slider);
+        }
+
+        panel.add(previewBox);
+    }
+
+    private JSlider[] getSliders() {
+        return new JSlider[] {
+                hueSlider,
+                saturationSlider,
+                brightnessSlider,
+                bodySlider,
+                faceSlider,
+                earSlider,
+                noseSlider,
+                mouthSlider,
+                eyeSlider
+        };
+    }
+
+    private JSlider createOptionSlider(int optionCount) {
+        JSlider slider = new JSlider(0, optionCount - 1, 0);
+
+        slider.setOpaque(false);
+        slider.setFocusable(false);
+
+        slider.setSnapToTicks(true);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+
+        slider.setMajorTickSpacing(1);
+        slider.setMinorTickSpacing(1);
+
+        slider.setUI(new CustomSliderUI(
+                slider,
                 "/slider/regular slider track.png",
                 "/slider/thumb slider.png"
         ));
 
-        extraSlider.setPaintLabels(true);
+        setSliderLabels(slider, optionCount);
 
+        return slider;
+    }
+
+    private void setSliderLabels(JSlider slider, int optionCount) {
         Hashtable<Integer, JLabel> labels = new Hashtable<>();
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < optionCount; i++) {
             JLabel label = new JLabel(String.valueOf(i + 1));
             label.setForeground(Color.WHITE);
-            label.setFont(new Font("OCR A Extended", Font.BOLD, 14));
+            label.setFont(new Font("OCR A Extended", Font.BOLD, 10));
             labels.put(i, label);
         }
 
-        extraSlider.setLabelTable(labels);
-
-        panel.add(title);
-
-        panel.add(hueLabel);
-        panel.add(satLabel);
-        panel.add(brightLabel);
-        panel.add(extraLabel);
-
-        panel.add(hueSlider);
-        panel.add(saturationSlider);
-        panel.add(brightnessSlider);
-        panel.add(extraSlider);
-
-        panel.add(previewLabel);
-        panel.add(previewBox);
+        slider.setLabelTable(labels);
     }
 
     private void connect() {
@@ -117,20 +178,27 @@ public class CustomPanel {
             }
         });
 
-        extraSlider.addChangeListener(e -> {
-            if (!extraSlider.getValueIsAdjusting() && optionListener != null) {
-                optionListener.accept(extraSlider.getValue());
-            }
-        });
+        bodySlider.addChangeListener(e -> fireOnRelease(bodySlider, bodyListener));
+        faceSlider.addChangeListener(e -> fireOnRelease(faceSlider, faceListener));
+        earSlider.addChangeListener(e -> fireOnRelease(earSlider, earListener));
+        noseSlider.addChangeListener(e -> fireOnRelease(noseSlider, noseListener));
+        mouthSlider.addChangeListener(e -> fireOnRelease(mouthSlider, mouthListener));
+        eyeSlider.addChangeListener(e -> fireOnRelease(eyeSlider, eyeListener));
 
         colorController.setColorListener(color -> {
             selectedColor = color;
             previewBox.setColor(selectedColor);
 
-            if (colorListener != null) {
-                colorListener.accept(selectedColor);
+            if (skinColorListener != null) {
+                skinColorListener.accept(selectedColor);
             }
         });
+    }
+
+    private void fireOnRelease(JSlider slider, IntConsumer listener) {
+        if (!slider.getValueIsAdjusting() && listener != null) {
+            listener.accept(slider.getValue());
+        }
     }
 
     private void applyCurrentColorToController() {
@@ -151,11 +219,9 @@ public class CustomPanel {
         Color previewColor;
 
         if (brightness < 0.5f) {
-            float amount = brightness / 0.5f;
-            previewColor = blend(Color.BLACK, saturatedColor, amount);
+            previewColor = blend(Color.BLACK, saturatedColor, brightness / 0.5f);
         } else {
-            float amount = (brightness - 0.5f) / 0.5f;
-            previewColor = blend(saturatedColor, Color.WHITE, amount);
+            previewColor = blend(saturatedColor, Color.WHITE, (brightness - 0.5f) / 0.5f);
         }
 
         previewBox.setColor(previewColor);
@@ -171,31 +237,42 @@ public class CustomPanel {
         return new Color(r, g, bl);
     }
 
-    public void showCategory(
-            String titleText,
-            String extraText,
-            int optionCount,
-            Consumer<Color> colorListener,
-            IntConsumer optionListener
+    public void showBodyCategory(
+            Consumer<Color> skinColorListener,
+            IntConsumer bodyListener,
+            IntConsumer faceListener,
+            IntConsumer earListener,
+            IntConsumer noseListener,
+            IntConsumer mouthListener,
+            IntConsumer eyeListener
     ) {
-        title.setText(titleText);
-        extraLabel.setText(extraText);
+        title.setText("Body");
 
-        this.colorListener = colorListener;
-        this.optionListener = optionListener;
+        this.skinColorListener = skinColorListener;
 
-        extraSlider.setMinimum(0);
-        extraSlider.setMaximum(optionCount - 1);
-        extraSlider.setValue(0);
+        this.bodyListener = bodyListener;
+        this.faceListener = faceListener;
+        this.earListener = earListener;
+        this.noseListener = noseListener;
+        this.mouthListener = mouthListener;
+        this.eyeListener = eyeListener;
 
-        if (optionListener != null) {
-            optionListener.accept(extraSlider.getValue());
-        }
+        fireAllCurrentOptions();
 
         updatePreviewOnly();
         applyCurrentColorToController();
+
         panel.revalidate();
         panel.repaint();
+    }
+
+    private void fireAllCurrentOptions() {
+        if (bodyListener != null) bodyListener.accept(bodySlider.getValue());
+        if (faceListener != null) faceListener.accept(faceSlider.getValue());
+        if (earListener != null) earListener.accept(earSlider.getValue());
+        if (noseListener != null) noseListener.accept(noseSlider.getValue());
+        if (mouthListener != null) mouthListener.accept(mouthSlider.getValue());
+        if (eyeListener != null) eyeListener.accept(eyeSlider.getValue());
     }
 
     public void updateLayout() {
@@ -206,47 +283,47 @@ public class CustomPanel {
             return;
         }
 
-        int padding = clamp(w / 8, 20, 40);
+        int padding = clamp(w / 10, 16, 30);
         int contentWidth = Math.max(1, w - padding * 2);
 
-        int titleHeight = clamp(h / 10, 24, 34);
-        int labelHeight = clamp(h / 34, 14, 20);
+        int titleHeight = clamp(h / 13, 22, 32);
+        int labelHeight = clamp(h / 45, 11, 16);
 
-        int previewBoxHeight = clamp(h / 12, 28, 46);
-        int previewGap = 6;
+        int previewBoxHeight = clamp(h / 15, 24, 40);
+        int previewGap = 5;
 
         title.setBounds(padding, padding, contentWidth, titleHeight);
 
-        int y = padding + titleHeight + 10;
+        int y = padding + titleHeight + 6;
 
         int reservedPreviewSpace =
                 labelHeight + 4 + previewBoxHeight + previewGap + padding;
 
         int available = h - y - reservedPreviewSpace;
 
-        int rowHeight = clamp(available / slider_count, 46, 64);
-        int sliderHeight = clamp((int) Math.round(rowHeight * 0.65), 28, 42);
+        int rowHeight = clamp(available / SLIDER_COUNT, 30, 48);
+        int sliderHeight = clamp((int) Math.round(rowHeight * 0.65), 22, 34);
 
         JLabel[] labels = {
                 hueLabel,
                 satLabel,
                 brightLabel,
-                extraLabel
+                bodyLabel,
+                faceLabel,
+                earLabel,
+                noseLabel,
+                mouthLabel,
+                eyeLabel
         };
 
-        JComponent[] sliders = {
-                hueSlider,
-                saturationSlider,
-                brightnessSlider,
-                extraSlider
-        };
+        JSlider[] sliders = getSliders();
 
-        for (int i = 0; i < slider_count; i++) {
+        for (int i = 0; i < SLIDER_COUNT; i++) {
             labels[i].setBounds(padding, y, contentWidth, labelHeight);
 
             sliders[i].setBounds(
                     padding,
-                    y + labelHeight + 4,
+                    y + labelHeight + 2,
                     contentWidth,
                     sliderHeight
             );
@@ -261,13 +338,12 @@ public class CustomPanel {
 
         previewBox.setBounds(padding, y, contentWidth, previewBoxHeight);
 
-        int thumb = clamp(w / 16, 12, 18);
-        int track = clamp(w / 40, 5, 9);
+        int thumb = clamp(w / 18, 10, 16);
+        int track = clamp(w / 45, 4, 8);
 
-        resize(hueSlider, track, thumb);
-        resize(saturationSlider, track, thumb);
-        resize(brightnessSlider, track, thumb);
-        resize(extraSlider, track, thumb);
+        for (JSlider slider : sliders) {
+            resize(slider, track, thumb);
+        }
     }
 
     private void resize(JSlider slider, int track, int thumb) {

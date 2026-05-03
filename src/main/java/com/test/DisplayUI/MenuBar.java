@@ -80,15 +80,12 @@ public class MenuBar {
         fullDressButton = createButton("Customize Outfit");
         shoeButton = createButton("Customize Shoes");
         accessoryButton = createButton("Customize Accessories");
-
+        
         bodyButton.addActionListener(e ->
-        customPanel.showCategory(
-            "Body",
-            "Body Type",
-            7,
-            color -> {},
-            index -> {
-                switch (index) {
+        customPanel.showBodyCategory(
+            color -> characterCanvas.setSkinTintColor(color),
+            bodyIndex -> {
+                switch (bodyIndex) {
                     case 0 -> characterCanvas.setMaleBodyImages(maleImages.m1_c, maleImages.m1_l);
                     case 1 -> characterCanvas.setMaleBodyImages(maleImages.m2_c, maleImages.m2_l);
                     case 2 -> characterCanvas.setMaleBodyImages(maleImages.m3_c, maleImages.m3_l);
@@ -98,15 +95,9 @@ public class MenuBar {
                     case 6 -> characterCanvas.setMaleBodyImages(maleImages.m7_c, maleImages.m7_l);
                     default -> characterCanvas.setMaleBodyImages(maleImages.m1_c, maleImages.m1_l);
                 }
-            }
-        ));
-        customPanel.showCategory(      
-            "Face",
-            "Face Shape",
-            11,
-            color -> {},
-            index -> {
-                switch (index) {
+            },
+            faceIndex -> {
+                switch (faceIndex) {
                     case 0 -> characterCanvas.setFace(faceImages.j1_c, faceImages.j1_l);
                     case 1 -> characterCanvas.setFace(faceImages.j2_c, faceImages.j2_l);
                     case 2 -> characterCanvas.setFace(faceImages.j3_c, faceImages.j3_l);
@@ -120,36 +111,85 @@ public class MenuBar {
                     case 10 -> characterCanvas.setFace(faceImages.j11_c, faceImages.j11_l);
                     default -> characterCanvas.setFace(faceImages.j1_c, faceImages.j1_l);
                 }
+            },
+            earIndex -> {
+                switch (earIndex) {
+                    case 0 -> characterCanvas.setEar(earImages.e1_c, earImages.e1_l);
+                    case 1 -> characterCanvas.setEar(earImages.e2_c, earImages.e2_l);
+                    case 2 -> characterCanvas.setEar(earImages.e3_c, earImages.e3_l);
+                    case 3 -> characterCanvas.setEar(earImages.e4_c, earImages.e4_l);
+                    case 4 -> characterCanvas.setEar(earImages.e5_c, earImages.e5_l);
+                    case 5 -> characterCanvas.setEar(earImages.e6_c, earImages.e6_l);
+                    case 6 -> characterCanvas.setEar(earImages.e7_c, earImages.e7_l);
+                    case 7 -> characterCanvas.setEar(earImages.e8_c, earImages.e8_l);
+                    default -> characterCanvas.setEar(earImages.e1_c, earImages.e1_l);
+                }
+            },
+            noseIndex -> {
+                switch (noseIndex) {
+                    case 0 -> characterCanvas.setNose(noseImages.n1);
+                    case 1 -> characterCanvas.setNose(noseImages.n2);
+                    case 2 -> characterCanvas.setNose(noseImages.n3);
+                    case 3 -> characterCanvas.setNose(noseImages.n4);
+                    case 4 -> characterCanvas.setNose(noseImages.n5);
+                    default -> characterCanvas.setNose(noseImages.n1);
+                }
+            },
+            mouthIndex -> {
+                switch (mouthIndex) {
+                    case 0 -> characterCanvas.setMouth(mouthImages.l1);
+                    case 1 -> characterCanvas.setMouth(mouthImages.l2);
+                    case 2 -> characterCanvas.setMouth(mouthImages.l3);
+                    case 3 -> characterCanvas.setMouth(mouthImages.l4);
+                    case 4 -> characterCanvas.setMouth(mouthImages.l5);
+                    case 5 -> characterCanvas.setMouth(mouthImages.l6);
+                    case 6 -> characterCanvas.setMouth(mouthImages.l7);
+                    case 7 -> characterCanvas.setMouth(mouthImages.l8);
+                    default -> characterCanvas.setMouth(mouthImages.l1);
+                }
+            },
+            eyeIndex -> {
+                switch (eyeIndex) {
+                    case 0 -> characterCanvas.setEye(eyeImages.e1_c, eyeImages.e1_l);
+                    case 1 -> characterCanvas.setEye(eyeImages.e2_c, eyeImages.e2_l);
+                    case 2 -> characterCanvas.setEye(eyeImages.e3_c, eyeImages.e3_l);
+                    case 3 -> characterCanvas.setEye(eyeImages.e4_c, eyeImages.e4_l);
+                    case 4 -> characterCanvas.setEye(eyeImages.e5_c, eyeImages.e5_l);
+                    case 5 -> characterCanvas.setEye(eyeImages.e6_c, eyeImages.e6_l);
+                    case 6 -> characterCanvas.setEye(eyeImages.e7_c, eyeImages.e7_l);
+                    case 7 ->characterCanvas.setEye(eyeImages.e8_c, eyeImages.e8_l);
+                    default -> characterCanvas.setEye(eyeImages.e1_c, eyeImages.e1_l);
+                }
             }
-        );
+        ));
 
-        faceButton.addActionListener(e ->
-                customPanel.showCategory("Face", "Face Type", 6, color -> {}, index -> {})
-        );
+        // faceButton.addActionListener(e ->
+        //         customPanel.showCategory("Face", "Face Type", 6, color -> {}, index -> {})
+        // );
 
-        hairButton.addActionListener(e ->
-                customPanel.showCategory("Hair", "Hair Style", 8, color -> {}, index -> {})
-        );
+        // hairButton.addActionListener(e ->
+        //         customPanel.showCategory("Hair", "Hair Style", 8, color -> {}, index -> {})
+        // );
 
-        topButton.addActionListener(e ->
-                customPanel.showCategory("Top", "Top Type", 8, color -> {}, index -> {})
-        );
+        // topButton.addActionListener(e ->
+        //         customPanel.showCategory("Top", "Top Type", 8, color -> {}, index -> {})
+        // );
 
-        bottomButton.addActionListener(e ->
-                customPanel.showCategory("Bottom", "Bottom Type", 8, color -> {}, index -> {})
-        );
+        // bottomButton.addActionListener(e ->
+        //         customPanel.showCategory("Bottom", "Bottom Type", 8, color -> {}, index -> {})
+        // );
 
-        fullDressButton.addActionListener(e ->
-                customPanel.showCategory("Outfit", "Outfit Type", 8, color -> {}, index -> {})
-        );
+        // fullDressButton.addActionListener(e ->
+        //         customPanel.showCategory("Outfit", "Outfit Type", 8, color -> {}, index -> {})
+        // );
 
-        shoeButton.addActionListener(e ->
-                customPanel.showCategory("Shoes", "Shoe Type", 6, color -> {}, index -> {})
-        );
+        // shoeButton.addActionListener(e ->
+        //         customPanel.showCategory("Shoes", "Shoe Type", 6, color -> {}, index -> {})
+        // );
 
-        accessoryButton.addActionListener(e ->
-                customPanel.showCategory("Accessories", "Accessory Type", 10, color -> {}, index -> {})
-        );
+        // accessoryButton.addActionListener(e ->
+        //         customPanel.showCategory("Accessories", "Accessory Type", 10, color -> {}, index -> {})
+        // );
     }
 
     private JButton createButton(String tooltip) {
